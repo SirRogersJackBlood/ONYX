@@ -1,1 +1,0 @@
-Private P2P messenger over Tor. No phone numbers, no servers, post-quantum E2EE.

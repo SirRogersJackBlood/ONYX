@@ -123,6 +123,12 @@ td:first-child { color: var(--muted); }
 .tiers li:last-child span { color: var(--silver); }
 .tiers em { font-style: normal; color: var(--muted); font-size: 14px; }
 
+/* origin */
+.origin { display: grid; grid-template-columns: 240px 1fr; gap: 40px; align-items: center; }
+.origin-art img { width: 220px; height: 220px; object-fit: contain; margin: 0 auto; }
+.origin p { color: #cfdde2; max-width: 680px; }
+.origin p.dim { color: var(--muted); }
+
 /* downloads */
 .apks { display: grid; gap: 12px; margin: 18px 0; }
 .apk { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
@@ -204,6 +210,8 @@ pre.code[data-lang]::before { content: attr(data-lang); position: absolute; top:
   .specs { grid-template-columns: 1fr 1fr; }
   .forge { grid-template-columns: 1fr; gap: 24px; }
   .forge-art { max-width: 320px; }
+  .origin { grid-template-columns: 1fr; gap: 12px; }
+  .origin-art img { width: 160px; height: 160px; margin: 0; }
   .docs { grid-template-columns: 1fr; gap: 12px; padding-top: 16px; }
   .side-desktop { display: none; }
   .side-mobile { display: block; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }

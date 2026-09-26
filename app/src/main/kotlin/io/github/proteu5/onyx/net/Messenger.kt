@@ -7,6 +7,7 @@ import io.github.proteu5.onyx.core.Bytes
 import io.github.proteu5.onyx.core.Envelope
 import io.github.proteu5.onyx.core.ForgeRank
 import io.github.proteu5.onyx.core.Frame
+import io.github.proteu5.onyx.core.MessagePolicy
 import io.github.proteu5.onyx.core.OnionAddress
 import io.github.proteu5.onyx.core.Pairing
 import io.github.proteu5.onyx.core.PreKeyBundleWire
@@ -150,14 +151,31 @@ class Messenger(
 
     // ------------------------------------------------------------------ sending
 
-    fun sendText(contact: Contact, text: String) {
-        require(text.isNotBlank() && text.length <= 8_000)
-        val env = Envelope.text(text, System.currentTimeMillis())
+    class RateLimited : Exception("Slow down: at most 20 messages a minute.")
+
+    // Send times per contact, memory only: enough to stop scripted bulk sending.
+    private val sendTimes = ConcurrentHashMap<String, MutableList<Long>>()
+
+    /**
+     * Sends one short human message. The text is sanitized by [MessagePolicy]
+     * (80 chars max, one line, no code-shaped symbols) and rate-limited. Returns what was actually sent.
+     */
+    fun sendText(contact: Contact, raw: String): String {
+        val text = MessagePolicy.sanitize(raw)
+        require(text.isNotEmpty()) { "Nothing left to send after removing unsupported characters." }
+        val now = System.currentTimeMillis()
+        val times = sendTimes.getOrPut(contact.id) { mutableListOf() }
+        synchronized(times) {
+            if (!MessagePolicy.rateAllowed(times, now)) throw RateLimited()
+            times.removeAll { now - it >= 60_000 }; times.add(now)
+        }
+        val env = Envelope.text(text, now)
         val expires = if (contact.disappearSeconds > 0) System.currentTimeMillis() + contact.disappearSeconds * 1000L else 0L
         val msg = Message(Bytes.hex(env.id), contact.id, true, text, env.sentAtMinute, MsgState.QUEUED, null, expires)
         messages.add(msg)
         queueEnvelope(contact, env, msg.id)
         kick()
+        return text
     }
 
     fun setDisappearing(contact: Contact, seconds: Int) {
@@ -229,9 +247,15 @@ class Messenger(
         when (env.kind) {
             Envelope.Kind.TEXT -> {
                 val expires = if (fresh.disappearSeconds > 0) System.currentTimeMillis() + fresh.disappearSeconds * 1000L else 0L
-                messages.add(Message(Bytes.hex(env.id), fresh.id, false, String(env.body, Charsets.UTF_8),
-                    env.sentAtMinute, MsgState.RECEIVED, Transport.TOR_DIRECT, expires))
-                notifyIncoming()
+                // Re-apply the policy on receipt: an older or modified client could send anything.
+                // Oversized bodies are cut before decoding; empty results are dropped (still ACKed).
+                val raw = String(env.body, 0, minOf(env.body.size, 1024), Charsets.UTF_8)
+                val text = MessagePolicy.sanitize(raw)
+                if (text.isNotEmpty()) {
+                    messages.add(Message(Bytes.hex(env.id), fresh.id, false, text,
+                        env.sentAtMinute, MsgState.RECEIVED, Transport.TOR_DIRECT, expires))
+                    notifyIncoming()
+                }
             }
             Envelope.Kind.BADGE -> runCatching { contacts.save(fresh.copy(badge = ForgeRank.Badge.decode(env.body))) }
             Envelope.Kind.TIMER -> runCatching {

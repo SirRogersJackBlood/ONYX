@@ -1,1 +1,0 @@
-First Forge milestone: Tor P2P messaging, QR pairing, PQ E2EE, Snowflake + Forge rank.

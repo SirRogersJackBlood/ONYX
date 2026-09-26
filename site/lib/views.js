@@ -35,6 +35,7 @@ function nav(active = '') {
     ${link('/#how', 'How it works', 'how')}
     ${link('/#privacy', 'Privacy', 'privacy')}
     ${link('/docs', 'Docs', 'docs')}
+    ${link('/docs/about', 'About', 'about')}
     ${link('/#download', 'Download', 'download')}
     <a href="https://github.com/SirRogersJackBlood/ONYX" rel="noopener noreferrer">Source</a>
   </nav>
@@ -165,6 +166,18 @@ ${nav()}
         <li><span>Crucible</span><em>1,000 h or 5,000</em></li>
       </ol>
       <p class="dim">Your rank is visible only to the people you chat with, inside the encrypted session. No leaderboard, no server, no public profile.</p>
+    </div>
+  </section>
+
+  <section id="origin" class="section origin">
+    <div class="origin-art"><img src="/img/raven.png" alt="Raven" width="220" height="220" loading="lazy"></div>
+    <div>
+      <p class="kicker">/ORIGIN</p>
+      <h2>Born from watching an attack.</h2>
+      <p>About three and a half years ago, an attacker used my work machine as a sandbox to unpack a remote-access toolkit built on Intel AMT's Local Manageability Service. I found the hashes, reported it, and then followed the trail at home, quietly watching the attacker work.</p>
+      <p>While they pursued their malicious goals, I found a better use for the same building blocks: a Gunyah hypervisor, strong encryption and low-level communication ports. On paper, that was the birth of ONYX, under a different name.</p>
+      <p><strong>Defensive by design.</strong> ONYX protects the people using it. It never engages, traces or strikes back at anyone. For civilians the lawful path is blue team: observe your own systems, preserve evidence, report, and harden.</p>
+      <p class="dim">That's also why ONYX is built for people, not programs: 80-character plain messages, no code, no attachments, no automation. <a href="/docs/about">Read more</a></p>
     </div>
   </section>
 

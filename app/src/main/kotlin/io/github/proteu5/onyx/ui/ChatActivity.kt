@@ -81,11 +81,13 @@ class ChatActivity : OnyxActivity() {
 
         val bar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(dp(12), dp(8), dp(12), dp(12)); gravity = Gravity.CENTER_VERTICAL }
         input = EditText(this).apply {
-            hint = "Message"; setHintTextColor(Forge.MUTED); setTextColor(Forge.TEXT)
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            hint = "Message · 80 max"; setHintTextColor(Forge.MUTED); setTextColor(Forge.TEXT)
+            // One line, 80 characters: ONYX is for short human messages, not payloads or scripts.
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            filters = arrayOf(android.text.InputFilter.LengthFilter(io.github.proteu5.onyx.core.MessagePolicy.MAX_CHARS))
             // Ask the keyboard not to learn from what is typed here (Gboard incognito etc.).
             imeOptions = imeOptions or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-            maxLines = 5
+            maxLines = 3
             background = GradientDrawable().apply { cornerRadius = dp(10).toFloat(); setColor(Forge.SURFACE); setStroke(dp(1), Forge.LINE) }
             setPadding(dp(12), dp(10), dp(12), dp(10))
         }
@@ -129,7 +131,7 @@ class ChatActivity : OnyxActivity() {
         if (plainBucket == null) { draftLine.text = "draft $n B · too large"; return }
         val frame = runCatching { Padding.bucketFor(plainBucket + 160, Padding.FRAME_BUCKETS) }.getOrDefault(-1)
         draftLine.text = "draft $n B → padded to $plainBucket B → encrypted → ≈ ${frame + 4} B frame. " +
-            "A 1-letter message and a ${plainBucket - 27}-byte one look identical."
+            "Any message up to 80 characters looks identical on the wire."
     }
 
     private val timeFmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -215,8 +217,17 @@ class ChatActivity : OnyxActivity() {
         val t = input.text.toString().trim()
         if (t.isEmpty()) return
         if (!app.crypto.hasSession(c)) { toast("Secure session not ready yet — their phone must come online once."); return }
+        val clean = io.github.proteu5.onyx.core.MessagePolicy.sanitize(t)
+        if (clean.isEmpty()) { toast("Only letters, numbers, emoji and . , ! ? ' \" - : ( ) can be sent."); return }
         input.setText("")
-        thread { runCatching { app.messenger.sendText(c, t) }.onFailure { runOnUiThread { toast("Could not queue message") } } }
+        thread {
+            runCatching { app.messenger.sendText(c, t) }
+                .onSuccess { sent -> if (sent != t) runOnUiThread { toast("Code-like symbols were removed before sending.") } }
+                .onFailure { e -> runOnUiThread {
+                    if (e is io.github.proteu5.onyx.net.Messenger.RateLimited) { input.setText(t); toast(e.message ?: "Slow down") }
+                    else toast("Could not queue message")
+                } }
+        }
     }
 
     private fun showSafetyNumber() {

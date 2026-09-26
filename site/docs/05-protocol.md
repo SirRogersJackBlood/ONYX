@@ -115,7 +115,7 @@ MESSAGE_BUCKETS = { 256, 1024, 4096, 16384, 65536 }
 
 | Kind | Name | Body |
 |---|---|---|
-| 1 | TEXT | UTF-8 text |
+| 1 | TEXT | UTF-8 text, ≤ 80 characters after `MessagePolicy.sanitize` (enforced on send and receive) |
 | 2 | BADGE | `0x01 ‖ tier[u8] ‖ cover[u8]` (3 bytes, nothing else) |
 | 3 | RECEIPT | reserved; ONYX does not send read receipts |
 | 4 | PAIRED | empty; first message after pairing, completes PQXDH |

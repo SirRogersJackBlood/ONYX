@@ -47,9 +47,12 @@ Your identity and messages are only on that phone and there's no cloud backup, o
 - Bridges for networks that block Tor
 - SMS fallback (opt-in, clearly labelled as leaking metadata)
 - Nearby transport (Bluetooth / Wi-Fi Direct)
-- Attachments (chunked and padded)
 - F-Droid release with reproducible builds
 - Hardware-isolated vault on devices that support protected VMs
+
+## Why only 80 characters, and no attachments?
+
+On purpose. ONYX is for short conversations between people. It is not a file-transfer tool, a data pipe or something to wire into scripts or bots. Every message is limited to **80 characters on one line**, and code-shaped symbols (brackets, backticks, dollar signs, semicolons, pipes and friends) are removed, as are repeated symbols and invisible characters. There are **no attachments**, and none are planned. That keeps every message the same size on the wire, and makes ONYX useless as a hidden command channel. See [Threat model](threat-model#abuse-resistance).
 
 ## Who makes ONYX?
 

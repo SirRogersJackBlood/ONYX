@@ -63,6 +63,7 @@ You add people **in person** by scanning a one-time QR code, or remotely with a 
 - **Invite links.** 24 h, single use and revocable, marked *unverified* until you compare safety numbers.
 - **Silent link authentication.** Strangers who find your `.onion` get a closed socket and learn nothing.
 - **Size hiding.** Every message and every wire frame is padded to fixed buckets.
+- **Abuse-resistant by design.** 80-character one-line messages, code symbols stripped, no attachments, rate-limited, no automation API. It's for people, not bots.
 - **Hardware vault.** AES-256-GCM with the master key in StrongBox/TEE, HMAC'd index columns and secure delete.
 - **Hygiene.** Screenshots blocked, content-free notifications, app lock, disappearing messages, panic wipe.
 - **/FORGE rank.** Optionally run a Snowflake proxy to help censored users reach Tor (Wi-Fi and charging only). Your rank is visible only to people you chat with.
@@ -99,6 +100,7 @@ All docs are also on the website: **[https://0nyx.up.railway.app/docs](https://0
 | [Threat model](site/docs/06-threat-model.md) | Who sees what, and what ONYX does **not** protect against |
 | [Tor & Snowflake](site/docs/07-tor-and-snowflake.md) | Onion services, SOCKS and the /FORGE rank |
 | [Architecture](docs/ARCHITECTURE.md) | Layers, roadmap, dependencies |
+| [About](ABOUT.md) | How ONYX began, and why messages are short and plain |
 
 ## Security
 

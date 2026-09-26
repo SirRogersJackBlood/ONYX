@@ -56,6 +56,22 @@ These are real and on the roadmap:
 - **Loopback listener.** Other apps on the same phone can connect to ONYX's local port. They are rejected by link auth, but a Unix-domain socket would remove the surface entirely. *Planned.*
 - **Tor is not post-quantum.** That is upstream work in the Tor Project.
 
+## Abuse resistance
+
+ONYX is built for people, not programs, and is deliberately hard to turn into a covert data or command channel:
+
+| Control | What it does |
+|---|---|
+| **80-character, one-line messages** | Enforced when sending *and* again when receiving, so a modified client gains nothing |
+| **Symbol filter** | Only letters, digits, emoji and basic punctuation (. , ! ? ' " - : and parentheses) survive. Angle, curly and square brackets, backticks, dollar, backslash, pipe, semicolon, equals, hash, percent, ampersand, asterisk, underscore, at, slash, caret, tilde and plus are removed, so injection-style payloads (PHP, SQL, shell, template, jndi) arrive inert |
+| **No consecutive symbols** | `!!!` → `!`, `--` → `-`, `?>` → `?` |
+| **Invisible and look-alike characters stripped** | Zero-width characters and bidi overrides are removed; fullwidth look-alikes are normalized (NFKC) and then filtered |
+| **No attachments** | The only message kinds are text, badge, receipt, pairing and timer; anything else is rejected |
+| **Rate limit** | At most 20 messages per minute per contact, at least 0.7 s apart |
+| **No automation surface** | No exported API, intents, broadcast or service that can send a message. The only exported screen pre-fills an invite code and still needs a human tap |
+
+These rules are unit-tested against real injection payloads in `core/MessagePolicy`.
+
 ## Supply chain
 
 - **No Google Play Services, Firebase, analytics or crash reporting.**

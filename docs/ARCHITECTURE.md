@@ -117,5 +117,5 @@ No AndroidX, no Play Services, no Firebase, no analytics. `dependenciesInfo` is 
 ## 8. Roadmap
 - **M1 (this build):** identity, vault, encrypted store, Tor onion, QR pairing, PQ E2EE 1:1 over Tor P2P, outbox, disappearing messages, app lock, panic wipe, Snowflake + Forge rank + badge sharing.
 - **M2:** mailbox mode (Redmi as always-on mailbox), Tor client auth, per-contact onions, SMS transport (full default-SMS-app role), bridges (obfs4/Snowflake-as-client) for censored networks.
-- **M3:** nearby transport, attachments (chunked, padded), reproducible-build verification, F-Droid submission.
+- **M3:** nearby transport, reproducible-build verification, F-Droid submission.
 - **Side thread:** `PvmKeyVault` on AVF-capable, self-signed builds (needs `MANAGE_VIRTUAL_MACHINE`).
