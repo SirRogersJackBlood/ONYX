@@ -22,5 +22,6 @@ foreach ($a in $apks) {
     Write-Host ("{0,-45} {1,8:N1} MB  {2}" -f (Split-Path $target -Leaf), ((Get-Item $target).Length / 1MB), $h)
 }
 if (Test-Path "$src\output-metadata.json") { Move-Item "$src\output-metadata.json" $dest -Force }
-$lines | Set-Content -Encoding ascii (Join-Path $dest 'SHA256SUMS.txt')
+# LF line endings so `sha256sum -c` also works on Linux/macOS
+[IO.File]::WriteAllText((Join-Path (Resolve-Path $dest) 'SHA256SUMS.txt'), (($lines -join "`n") + "`n"), [Text.Encoding]::ASCII)
 Write-Host "`nStaged in $dest. Paste SHA256SUMS.txt into RELEASE.md and tick the change record."

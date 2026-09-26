@@ -68,6 +68,13 @@ dddd19ad7fcede2b4a5727222ca3beab0dc3a9339bd76e8149f79da681604fe0  onyx-v1.2.3-x8
 7282a86a348993fa8fe17095c5db59c67cda3d7b0b726b0e87ce2aefb39c4124  onyx-v1.2.3-universal-debug.apk
 ```
 
+**PGP** (release key `9672 6F1B CC9F 9D5E 0CED CF9C BC48 B84D 2415 5676`, SirRogersJackBlood <sirrogersjackblood@proton.me>; key at [0nyx.up.railway.app/onyx-release-key.asc](https://0nyx.up.railway.app/onyx-release-key.asc))
+```text
+gpg --import onyx-release-key.asc
+gpg --verify SHA256SUMS.txt.asc SHA256SUMS.txt
+```
+Each APK also has a detached `.apk.asc` signature.
+
 **Signing certificate** (`CN=Android Debug, O=Android, C=US`, expected to be the same as previous releases)
 ```text
 SHA-256  f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165

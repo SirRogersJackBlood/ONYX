@@ -104,6 +104,8 @@ function landing({ apks, manifest, screenshots, docs }) {
     ${preview ? `<div class="callout warning"><p><strong>Preview build.</strong> ${e(manifest.notes || 'Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source.')}</p></div>` : ''}
     <div class="apks">${ghBlock}${ghRows}${apkRows}</div>
     ${manifest.signer_sha256 ? `<div class="hash signer"><span class="mono dim">SIGNING CERT SHA-256</span><code>${e(manifest.signer_sha256)}</code></div>` : ''}
+    ${manifest.pgp ? `<div class="hash signer"><span class="mono dim">PGP RELEASE KEY</span><code>${e(manifest.pgp.fingerprint)}</code></div>
+    <p class="dim small">Signed hash list: <a href="${e(manifest.pgp.sums_url)}" rel="noopener noreferrer">SHA256SUMS.txt</a> · <a href="${e(manifest.pgp.sig_url)}" rel="noopener noreferrer">.asc signature</a> · <a href="${e(manifest.pgp.key_url)}">public key</a> · <a href="/docs/install#3-check-the-pgp-signature-optional">how to verify</a></p>` : ''}
     <p class="dim">Most phones since 2017 need <strong>arm64-v8a</strong>.${(apks.length || ghAssets.length) ? ' Plain hash list: <a href="/SHA256SUMS">/SHA256SUMS</a>' : ''}</p>`
     : `<p class="dim">No build published yet. ONYX will be available on F-Droid.</p>`;
 

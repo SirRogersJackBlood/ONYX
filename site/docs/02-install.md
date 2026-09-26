@@ -45,6 +45,22 @@ apksigner verify --print-certs app-arm64-v8a-release.apk
 
 Compare the `SHA-256 digest` of the signer certificate with the one published on the download page. Android refuses to install an update signed by a different key, so after this first check every later update is verified automatically.
 
+### 3. Check the PGP signature (optional)
+
+The hash list itself is signed with the ONYX release key, so you don't have to trust GitHub or this website for the hashes. Download `SHA256SUMS.txt` and `SHA256SUMS.txt.asc` from the release, and the [public key](/onyx-release-key.asc).
+
+**Fingerprint:** `9672 6F1B CC9F 9D5E 0CED CF9C BC48 B84D 2415 5676`
+(SirRogersJackBlood, ONYX release signing, sirrogersjackblood@proton.me)
+
+```bash
+gpg --import onyx-release-key.asc
+gpg --fingerprint sirrogersjackblood@proton.me   # must match the fingerprint above
+gpg --verify SHA256SUMS.txt.asc SHA256SUMS.txt   # expect: Good signature
+sha256sum -c --ignore-missing SHA256SUMS.txt      # Linux / macOS
+```
+
+On Windows, Gpg4win (Kleopatra) runs the same `gpg` commands; then compare `Get-FileHash` with the line for your file. Each APK also has its own `.apk.asc` signature on the release.
+
 > **Warning** Preview builds are signed with a development key. The F-Droid release will be signed by F-Droid and will **not** upgrade over a preview install. Uninstall the preview first (this deletes its data).
 
 ## Install

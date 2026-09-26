@@ -19,7 +19,7 @@ const PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : 8080;
 const MIME = {
   '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
   '.webp': 'image/webp', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8',
-  '.woff2': 'font/woff2', '.json': 'application/json; charset=utf-8',
+  '.woff2': 'font/woff2', '.asc': 'text/plain; charset=utf-8', '.json': 'application/json; charset=utf-8',
 };
 
 // Security headers: nothing loads from anywhere but this origin, and no scripts run at all.

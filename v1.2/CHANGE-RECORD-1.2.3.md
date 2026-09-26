@@ -32,6 +32,8 @@ No protocol, storage or policy changes. Upgrades in place over v1.0–v1.2.1 (sa
 - [x] GitHub asset `onyx-v1.2.3-arm64-v8a-debug.apk` downloaded and hash matches `03bb0952…2630`; all four asset URLs resolve
 - [x] Website updated: release link, per-device downloads and SHA-256 from `site/releases/manifest.json`
 
+- [x] PGP: `SHA256SUMS.txt.asc` and all four `.apk.asc` verify as Good signature from `9672 6F1B CC9F 9D5E 0CED CF9C BC48 B84D 2415 5676`; published key contains no secret material
+
 ## Release steps
 `.\gradlew :app:assembleDebug` → `.\scripts\stage-release.ps1 -Version 1.2.3` → hashes into release notes → push → GitHub pre-release `v1.2.3`.
 

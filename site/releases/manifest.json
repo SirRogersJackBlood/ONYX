@@ -42,5 +42,11 @@
       "size": 607675154,
       "note": "Any device (largest)"
     }
-  ]
+  ],
+  "pgp": {
+    "fingerprint": "9672 6F1B CC9F 9D5E 0CED CF9C BC48 B84D 2415 5676",
+    "key_url": "/onyx-release-key.asc",
+    "sums_url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v.1.2.3/SHA256SUMS.txt",
+    "sig_url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v.1.2.3/SHA256SUMS.txt.asc"
+  }
 }
