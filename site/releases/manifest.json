@@ -1,0 +1,6 @@
+{
+  "version": "0.1.0-forge",
+  "channel": "preview",
+  "notes": "Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source.",
+  "signer_sha256": ""
+}

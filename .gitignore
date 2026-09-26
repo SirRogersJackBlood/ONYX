@@ -1,0 +1,74 @@
+# ─────────────────────────────────────────────────────────────
+#  ONYX .gitignore: nothing private, nothing generated, nothing huge
+# ─────────────────────────────────────────────────────────────
+
+# ── Secrets & signing (NEVER commit) ──
+local.properties
+keystore.properties
+signing.properties
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+*.der
+.env
+.env.*
+!.env.example
+# Tor onion keys / hidden-service dirs if ever exported for debugging
+hs_ed25519_secret_key
+hidden_service/
+*.onion.key
+
+# ── Private material ──
+# Raw photos (unblurred onion addresses & QR codes) and scratch
+Res/
+_to_delete/
+
+# ── Build output ──
+.gradle/
+.kotlin/
+build/
+**/build/
+.cxx/
+.externalNativeBuild/
+captures/
+*.hprof
+*.log
+
+# ── Binaries & archives (attach APKs to GitHub Releases instead) ──
+*.apk
+*.aab
+*.apks
+*.idsig
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.rar
+output-metadata.json
+mapping.txt
+
+# ── Site ──
+site/node_modules/
+site/releases/*
+!site/releases/manifest.json
+site/.railway/
+
+# ── IDE / editors ──
+.idea/
+*.iml
+.vscode/
+*.swp
+*~
+*.orig
+
+# ── OS junk ──
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Keep: gradle/wrapper/gradle-wrapper.jar (needed to build)
+!gradle/wrapper/gradle-wrapper.jar

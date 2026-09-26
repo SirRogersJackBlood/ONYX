@@ -1,0 +1,20 @@
+ONYX is a private messenger that works without phone numbers, accounts or servers.
+
+<b>How it works</b>
+<ul>
+<li>You pair with someone in person by scanning a one-time QR code.</li>
+<li>Each phone hosts its own Tor onion service. Messages travel onion-to-onion, so nobody sees IP addresses or who talks to whom.</li>
+<li>Messages are end-to-end encrypted with the Signal Protocol (libsignal): post-quantum PQXDH key agreement and the Triple Ratchet (Double Ratchet + SPQR).</li>
+<li>All local data is encrypted with a key held in the Android Keystore (StrongBox / secure element when available).</li>
+</ul>
+
+<b>Privacy by design</b>
+<ul>
+<li>No phone number, email, username or profile.</li>
+<li>No central server, directory or push service. No Google services.</li>
+<li>Every message is padded to fixed size buckets.</li>
+<li>Screenshots blocked, content-free notifications, optional app lock, panic wipe.</li>
+</ul>
+
+<b>Help the Tor network</b>
+Optionally run a Snowflake proxy (Wi-Fi + charging only) to help people in censored countries reach Tor. Earn a Forge rank badge that only the people you chat with can see.

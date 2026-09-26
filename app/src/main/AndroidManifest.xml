@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: AGPL-3.0-only -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Tor and Snowflake need sockets. ONYX itself never contacts any server directly. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!-- Everything below is deliberately absent: no contacts, location, phone state, SMS
+         (SMS transport ships later, opt-in), boot autostart, or advertising ID. -->
+
+    <application
+        android:name=".OnyxApp"
+        android:label="ONYX"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.Onyx"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:usesCleartextTraffic="false"
+        android:hasFragileUserData="false"
+        android:supportsRtl="true">
+
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.ChatActivity" android:exported="false" android:windowSoftInputMode="adjustResize" android:screenOrientation="portrait" />
+        <activity android:name=".ui.PairActivity" android:exported="false" android:screenOrientation="portrait" />
+        <!-- Exported ONLY to receive invite links. It pre-fills the code; pairing always needs a user tap. -->
+        <activity
+            android:name=".ui.ScanActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
+            <intent-filter android:label="Connect on ONYX">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="onyx1" />
+            </intent-filter>
+            <intent-filter android:label="Connect on ONYX">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.SettingsActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".ui.AboutActivity" android:exported="false" android:screenOrientation="portrait" />
+
+        <service
+            android:name=".service.OnyxService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Hosts a Tor onion service so paired contacts can deliver end-to-end encrypted messages peer-to-peer without any central server." />
+        </service>
+    </application>
+</manifest>

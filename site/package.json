@@ -1,0 +1,14 @@
+{
+  "name": "onyx-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ONYX release site and docs. Zero dependencies, zero client-side JavaScript.",
+  "license": "AGPL-3.0-only",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test/smoke.js"
+  },
+  "engines": { "node": ">=20" }
+}
