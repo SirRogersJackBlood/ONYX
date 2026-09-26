@@ -56,4 +56,4 @@ On purpose. ONYX is for short conversations between people. It is not a file-tra
 
 ## Who makes ONYX?
 
-Design by **SirRogersJackBlood**. The source is AGPL-3.0: read it, build it, audit it.
+Design, direction and QA by **SirRogersJackBlood**; development by **Claude (Anthropic)** as an AI pair-programmer. ONYX's code was written with AI assistance and tested on real devices by its designer. The source is AGPL-3.0: read it, build it, audit it, and report security issues privately via [GitHub Security Advisories](https://github.com/SirRogersJackBlood/ONYX/security/advisories/new).

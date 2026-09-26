@@ -1,12 +1,22 @@
-# ONYX v1.2.1 "Forge": pre-release
+# ONYX v1.2.3 "Forge": People, Not Programs (pre-release)
 
 🌐 [0nyx.up.railway.app](https://0nyx.up.railway.app/) · Source: [SirRogersJackBlood/ONYX](https://github.com/SirRogersJackBlood/ONYX) · Previous: [v1.1.0](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v1.1.0)
 
 > **Pre-release (debug build).** Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source and will **not** upgrade over this build.
 >
-> v1.2.0 was skipped; its changes ship in this release.
+> Final pre-release before the beta. Includes all v1.2.x changes (1.2.0 was skipped and the 1.2.2 test build was not published).
 
-## New in v1.2.1
+## New in v1.2.3
+
+### Credits
+The About screen now has a **CREDITS** card:
+- **Design, direction & QA:** SirRogersJackBlood
+- **Development:** Claude (Anthropic), AI pair-programmer
+- **Built on:** libsignal (Signal) · Tor, tor-android & jtorctl (The Tor Project, Guardian Project) · Snowflake via IPtProxy · ZXing
+
+ONYX's code was written with AI assistance and tested on real devices by its designer. Independent security review is welcome: report issues privately via [GitHub Security Advisories](https://github.com/SirRogersJackBlood/ONYX/security/advisories/new) (see `SECURITY.md`).
+
+## Also in v1.2 (from v1.2.1)
 
 ### Security hardening: people, not programs
 ONYX is now deliberately useless as an automated or hidden command channel:
@@ -30,22 +40,23 @@ ONYX is now deliberately useless as an automated or hidden command channel:
 - The website has a new **/ORIGIN** section and an **About** page, plus [`ABOUT.md`](https://github.com/SirRogersJackBlood/ONYX/blob/main/ABOUT.md) in the repo.
 
 ### Other
-- Version **1.2.1** (versionCode 5).
+- **Version tracking on About:** shows the installed version and build number (read from the app itself), the build type, the signing certificate's SHA-256 (compare it with the value below) and a version history.
+- Version **1.2.3** (versionCode 6).
 - `core` tests: **28/28** (5 new security tests).
 
 ## Compatibility
 - Wire protocol unchanged. Works with v1.0.0-pre1 and v1.1.0.
-- Messages from older versions are sanitized when received on v1.2.1.
+- Messages from older versions are sanitized when received on v1.2.3.
 - Same signing key as earlier pre-releases, so installing over them keeps your data.
 
 ## Downloads
 
 | File | For |
 |---|---|
-| `onyx-v1.2.1-arm64-v8a-debug.apk` | Almost all phones since 2017. **Pick this if unsure.** |
-| `onyx-v1.2.1-armeabi-v7a-debug.apk` | Older 32-bit phones |
-| `onyx-v1.2.1-x86_64-debug.apk` | Emulators |
-| `onyx-v1.2.1-universal-debug.apk` | Any device (largest) |
+| `onyx-v1.2.3-arm64-v8a-debug.apk` | Almost all phones since 2017. **Pick this if unsure.** |
+| `onyx-v1.2.3-armeabi-v7a-debug.apk` | Older 32-bit phones |
+| `onyx-v1.2.3-x86_64-debug.apk` | Emulators |
+| `onyx-v1.2.3-universal-debug.apk` | Any device (largest) |
 
 ## Verify
 
@@ -60,8 +71,8 @@ SHA-256  f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165
 ```
 
 ```powershell
-Get-FileHash .\onyx-v1.2.1-arm64-v8a-debug.apk -Algorithm SHA256
-apksigner verify --print-certs .\onyx-v1.2.1-arm64-v8a-debug.apk
+Get-FileHash .\onyx-v1.2.3-arm64-v8a-debug.apk -Algorithm SHA256
+apksigner verify --print-certs .\onyx-v1.2.3-arm64-v8a-debug.apk
 ```
 
 ## Known limitations
@@ -71,4 +82,4 @@ apksigner verify --print-certs .\onyx-v1.2.1-arm64-v8a-debug.apk
 - Higher battery use than push-based messengers, by design.
 
 ---
-<sub>Design by **SirRogersJackBlood** · AGPL-3.0-only · Change record CR-ONYX-2026-003</sub>
+<sub>Design, direction & QA by **SirRogersJackBlood** · Development by Claude (Anthropic) · AGPL-3.0-only · Change records CR-ONYX-2026-003, CR-ONYX-2026-004</sub>

@@ -33,7 +33,10 @@ These rules are enforced both when sending and when receiving, and they are cove
 
 ## Credits
 
-- **Design:** SirRogersJackBlood
-- **Built on:** libsignal (Signal Messenger), Tor via tor-android and jtorctl (The Tor Project, Guardian Project), Snowflake via IPtProxy, ZXing
+- **Design, direction & QA:** SirRogersJackBlood
+- **Development:** Claude (Anthropic), AI pair-programmer
+- **Built on:** libsignal (Signal Messenger) · Tor, tor-android & jtorctl (The Tor Project, Guardian Project) · Snowflake via IPtProxy · ZXing
 - **License:** AGPL-3.0-only
 - **Source:** https://github.com/SirRogersJackBlood/ONYX · **Website:** https://0nyx.up.railway.app
+
+ONYX's code was written with AI assistance and tested on real devices by its designer. Independent security review is welcome: report issues privately via [GitHub Security Advisories](https://github.com/SirRogersJackBlood/ONYX/security/advisories/new). See [SECURITY.md](SECURITY.md).

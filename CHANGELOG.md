@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.2.3 (pre-release, debug)
+_Final pre-release before the beta. Includes everything from v1.2.1; the interim 1.2.2 test build was not published._
+- **Added:** CREDITS on the About screen: design, direction & QA by SirRogersJackBlood; development by Claude (Anthropic), AI pair-programmer; dependencies; an invitation for independent security review.
+- **Added:** `SECURITY.md` (private reporting via GitHub Security Advisories). Credits updated in `ABOUT.md`, the website About page and FAQ.
+- **Changed:** versionCode 6, versionName `1.2.3`. Website download info now shows 1.2.3.
+- Change record: [`v1.2/CHANGE-RECORD-1.2.3.md`](v1.2/CHANGE-RECORD-1.2.3.md).
+
 ## v1.2.1 (pre-release, debug)
 _v1.2.0 was skipped; its changes ship here._
 - **Added:** origin story and "A note on messages" in the app About screen, on the website (/ORIGIN section + /docs/about) and in `ABOUT.md`.
@@ -8,6 +15,7 @@ _v1.2.0 was skipped; its changes ship here._
 - **Policy:** no attachments, now or planned. Removed from the roadmap.
 - **UI:** single-line input with an 80-character limit; notice when symbols were removed.
 - **Tests:** 28/28 in `core` (5 new: injection payloads, normal chat, invisibles and look-alikes, 80-code-point truncation, rate limit).
+- **Added:** version tracking on the About screen: installed version and build number (read from the package itself), build type, signing-certificate SHA-256 to compare with release notes, and a version history.
 - **Changed:** versionCode 5, versionName `1.2.1`.
 - Change record: [`v1.2/CHANGE-RECORD.md`](v1.2/CHANGE-RECORD.md).
 

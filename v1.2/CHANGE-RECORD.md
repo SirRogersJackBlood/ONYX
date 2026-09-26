@@ -19,6 +19,7 @@ Prevent ONYX from being repurposed as an automated or API-driven covert channel,
 4. `ChatActivity`: single-line input with an 80-character `LengthFilter`; user feedback when symbols were removed or the rate limit hit.
 5. Docs: threat model "Abuse resistance", FAQ, protocol, how-it-works; attachments removed from the roadmap.
 6. Version: versionCode 5, versionName `1.2.1` (v1.2.0 skipped by decision; never released).
+8. About: version tracking (versionName and versionCode via PackageManager, debug/release flag, signing-cert SHA-256 via GET_SIGNING_CERTIFICATES, in-app version history).
 7. About/origin: story proofread and published in the app About screen, the website (/ORIGIN section, /docs/about, "About" in the nav) and `ABOUT.md`.
 
 ## Compatibility
