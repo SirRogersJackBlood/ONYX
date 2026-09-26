@@ -51,6 +51,8 @@ Tap **RAW** in any chat to split the screen. The lower half shows, live, the exa
 - **Hex dump**: the start of the frame. Past the small header it's ciphertext, then zeros.
 - **While you type**, a meter shows how big your draft will be on the wire. "ok" and a 200-character paragraph produce the same size.
 
+![Two phones side by side, both with the RAW view open under the chat, showing 1,028-byte frames that are mostly zero padding](/screenshots/11-raw-wire-view.jpg)
+
 The RAW view is memory-only. It is never saved to disk, holds only ciphertext and padding, and is wiped by panic wipe.
 
 ## What people can see

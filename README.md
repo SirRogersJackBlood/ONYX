@@ -46,6 +46,11 @@ You add people **in person** by scanning a one-time QR code, or remotely with a 
   <img src="site/public/screenshots/08-forge-rank.jpg" width="200">
   <img src="site/public/screenshots/09-security.jpg" width="200">
 </p>
+<p align="center">
+  <img src="site/public/screenshots/10-cross-version-v1.0-v1.1.jpg" width="260">
+  <img src="site/public/screenshots/11-raw-wire-view.jpg" width="260"><br>
+  <sub>Left: v1.0 ⇄ v1.1 chatting across versions. Right: the v1.1 RAW view, showing exactly what an interceptor would capture.</sub>
+</p>
 
 <sub>Onion addresses and pairing QR codes are blurred in these photos. Never publish yours.</sub>
 

@@ -5,6 +5,8 @@
 - **Added:** live on-the-wire size meter while typing.
 - **Added:** `FrameCodec.tap` and `WireAnatomy` in `core`, with a test proving the tap sees the exact wire bytes and no plaintext.
 - **Changed:** versionCode 3, versionName `1.1.0`.
+- **Verified:** interoperates with v1.0.0-pre1; same signing certificate (`f9eb3fcb…5165`), so it upgrades in place.
+- Change record: [`v1.1/CHANGE-RECORD.md`](v1.1/CHANGE-RECORD.md) · notes: [`v1.1/RELEASE-NOTES.md`](v1.1/RELEASE-NOTES.md).
 
 ## v1.0.0-pre1 (pre-release, debug)
 - First public pre-release. Tor peer-to-peer messaging, PQXDH + Triple Ratchet (libsignal), in-person QR pairing, invite links (unverified until safety-number check), Share ONYX card, disappearing messages, app lock, panic wipe, /FORGE rank with an optional Snowflake proxy.

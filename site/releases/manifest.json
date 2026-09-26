@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0-pre1",
+  "version": "1.1.0",
   "channel": "preview",
   "notes": "Debug-signed pre-release for testing. The F-Droid release will be built and signed by F-Droid from source.",
   "signer_sha256": "f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165",
