@@ -42,6 +42,17 @@ Because this happens in person, your contact is **verified from the first messag
 4. The encrypted message is sent in a fixed-size frame. Their phone stores it and acknowledges it.
 5. If their phone is offline, the message waits in your outbox and retries with randomised back-off.
 
+## See it yourself: the RAW view
+
+Tap **RAW** in any chat to split the screen. The lower half shows, live, the exact bytes that cross the link for that conversation: what someone who managed to break Tor's encryption would capture.
+
+- **▲ OUT / ▼ IN**: each frame, its type, and its size on the wire (usually exactly 1,028 bytes for a normal message).
+- **Anatomy**: the bucket size, how many bytes are real payload versus zero padding, and whether it's a first (PQXDH) message or a normal Triple Ratchet message.
+- **Hex dump**: the start of the frame. Past the small header it's ciphertext, then zeros.
+- **While you type**, a meter shows how big your draft will be on the wire. "ok" and a 200-character paragraph produce the same size.
+
+The RAW view is memory-only. It is never saved to disk, holds only ciphertext and padding, and is wiped by panic wipe.
+
 ## What people can see
 
 | Who | What they see |

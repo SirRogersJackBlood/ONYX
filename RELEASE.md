@@ -1,10 +1,17 @@
-# ONYX v1.0.0-pre1 "Forge": pre-release
+# ONYX v1.1.0 "Forge": pre-release
 
 > **Pre-release (debug build).** Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source and will **not** upgrade over this build. Uninstall the preview first; this deletes its data.
 
 🌐 **Website:** [ONYX · Private messaging over Tor](https://0nyx.up.railway.app/), with docs, verification steps and downloads. **Source:** [https://github.com/SirRogersJackBlood/ONYX](https://github.com/SirRogersJackBlood/ONYX)
 
-## Highlights
+## New in v1.1
+
+- **RAW wire view.** Tap **RAW** in any chat to open a live hex view of the exact frames sent to and received from that contact: what an attacker who broke Tor would capture. Each frame shows its bucket size, how much of it is real payload versus padding, and whether it's a PQXDH first message or a Triple Ratchet message. It scrolls as the conversation happens.
+- **Live size meter.** While you type, the RAW view shows how big the message will be on the wire, and why a one-letter message and a 200-character one look identical.
+- Memory only: RAW captures are never written to disk, are capped per contact, hold only ciphertext and padding, and are wiped by panic wipe.
+- Version is now `1.1.0` (versionCode 3) in the app itself.
+
+## Highlights (since v1.0)
 
 - **Tor peer-to-peer messaging.** Each phone hosts its own ephemeral v3 onion service. There are no servers, accounts or phone numbers.
 - **Post-quantum end-to-end encryption.** PQXDH (X25519 + Kyber-1024) and the Triple Ratchet (Double Ratchet + SPQR/ML-KEM-768), via libsignal 0.86.5.
@@ -34,34 +41,31 @@
 
 From **[GitHub Releases](https://github.com/SirRogersJackBlood/ONYX/releases)**:
 
-| File | For | Size |
-|---|---|---|
-| `onyx-v1.0-pre1-arm64-v8a-debug.apk` | Almost all phones since 2017. **Pick this if unsure.** | 238.7 MB |
-| `onyx-v1.0-pre1-armeabi-v7a-debug.apk` | Older 32-bit phones | 222.9 MB |
-| `onyx-v1.0-pre1-x86_64-debug.apk` | Emulators | 244.8 MB |
-| `onyx-v1.0-pre1-universal-debug.apk` | Any device (largest) | 607.9 MB |
+| File | For |
+|---|---|
+| `onyx-v1.1.0-arm64-v8a-debug.apk` | Almost all phones since 2017. **Pick this if unsure.** |
+| `onyx-v1.1.0-armeabi-v7a-debug.apk` | Older 32-bit phones |
+| `onyx-v1.1.0-x86_64-debug.apk` | Emulators |
+| `onyx-v1.1.0-universal-debug.apk` | Any device (largest) |
 
-These are **debug** builds and are large because they keep full native debug symbols. Release builds will be far smaller.
+These are **debug** builds and are large because they keep full native debug symbols.
 
 ### Verify before installing
 
 ```text
-0a04ed83a2981b34c9e83dac666e3f007eacd817419eb504c1d8e446c438d07c  onyx-v1.0-pre1-arm64-v8a-debug.apk
-dc94ec33ce2e06b5b788d1a2a54fbddc5c78eba3b543d4214afce02dbd32a583  onyx-v1.0-pre1-armeabi-v7a-debug.apk
-92219a72683c5b59149a4d5e46ca97ef887d6b19df337eca53567a624804a8cc  onyx-v1.0-pre1-x86_64-debug.apk
-f3192e6e6f17c0cdc67ce461dfcfa3ec48e6725e308cded5d4298cc423b24ed9  onyx-v1.0-pre1-universal-debug.apk
+<SHA-256 from v1.1/SHA256SUMS.txt>
 ```
 
 ```powershell
-Get-FileHash .\onyx-v1.0-pre1-arm64-v8a-debug.apk -Algorithm SHA256
+Get-FileHash .\onyx-v1.1.0-arm64-v8a-debug.apk -Algorithm SHA256
 ```
 
 ```bash
 sha256sum -c SHA256SUMS.txt
-apksigner verify --print-certs onyx-v1.0-pre1-arm64-v8a-debug.apk
+apksigner verify --print-certs onyx-v1.1.0-arm64-v8a-debug.apk
 ```
 
-Signing: Android **debug** key (development only). Android shows the version as `0.1.0-forge` (versionCode 1); builds from pre2 onward show `1.0.0-pre2`.
+Signing: Android **debug** key (development only), certificate SHA-256 `f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165`. Installs over v1.0.0-pre1 without losing data, because it uses the same debug key.
 
 ## Known limitations
 

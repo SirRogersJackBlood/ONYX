@@ -89,10 +89,20 @@ sealed class Frame(val type: Int) {
     }
 }
 
-/** Reads/writes padded frames on a stream. Not thread-safe; one reader and one writer per link. */
+/** Direction of a frame relative to this device. */
+enum class WireDirection { OUT, IN }
+
+/**
+ * Reads/writes padded frames on a stream. Not thread-safe; one reader and one writer per link.
+ *
+ * [tap], when set, receives the EXACT bytes as they cross the link (u32 length + padded block):
+ * what someone who broke Tor's encryption would see. Used by the in-app RAW view; the bytes are
+ * already end-to-end ciphertext + padding, never plaintext.
+ */
 class FrameCodec(input: InputStream, output: OutputStream) {
     private val din = DataInputStream(input)
     private val dout = DataOutputStream(output)
+    @Volatile var tap: ((WireDirection, Int, ByteArray) -> Unit)? = null
 
     fun write(frame: Frame) {
         val inner = byteArrayOf(frame.type.toByte()) + frame.body()
@@ -100,7 +110,11 @@ class FrameCodec(input: InputStream, output: OutputStream) {
         dout.writeInt(padded.size)
         dout.write(padded)
         dout.flush()
+        tap?.let { t -> runCatching { t(WireDirection.OUT, frame.type, wireBytes(padded)) } }
     }
+
+    private fun wireBytes(padded: ByteArray): ByteArray =
+        ByteWriter(padded.size + 4).u32(padded.size.toLong()).raw(padded).toByteArray()
 
     fun read(): Frame {
         val len = din.readInt()
@@ -109,7 +123,9 @@ class FrameCodec(input: InputStream, output: OutputStream) {
         din.readFully(padded)
         val inner = Padding.unpad(padded, Padding.FRAME_BUCKETS)
         if (inner.isEmpty()) throw MalformedException("empty frame")
-        return Frame.decode(inner[0].toInt() and 0xff, inner.copyOfRange(1, inner.size))
+        val type = inner[0].toInt() and 0xff
+        tap?.let { t -> runCatching { t(WireDirection.IN, type, wireBytes(padded)) } }
+        return Frame.decode(type, inner.copyOfRange(1, inner.size))
     }
 
     inline fun <reified T : Frame> expect(): T {
@@ -136,5 +152,56 @@ object LinkAuth {
             if (Bytes.ctEquals(helloTag(key, nonceS, hello.nonce), hello.tag) && match == null) match = contact
         }
         return match
+    }
+}
+
+/** Human-readable anatomy of one wire frame, for the RAW view. Parses only public framing. */
+object WireAnatomy {
+    fun typeName(t: Int) = when (t) {
+        Frame.T_CHALLENGE -> "CHALLENGE"; Frame.T_HELLO -> "HELLO"; Frame.T_WELCOME -> "WELCOME"
+        Frame.T_PAIR_REQ -> "PAIR_REQUEST"; Frame.T_PAIR_RESP -> "PAIR_RESPONSE"
+        Frame.T_MESSAGE -> "MESSAGE"; Frame.T_ACK -> "ACK"; Frame.T_REJECT -> "REJECT"; Frame.T_BYE -> "BYE"
+        else -> "0x%02x".format(t)
+    }
+
+    /** e.g. "bucket 1024 B · payload 187 B · padding 836 B" (+ signal type for MESSAGE). */
+    fun describe(type: Int, wire: ByteArray): String {
+        val bucket = wire.size - 4
+        var end = wire.size - 1
+        while (end >= 4 && wire[end] == 0.toByte()) end--
+        val payload = (end - 4).coerceAtLeast(0)          // bytes before the 0x80 marker
+        val base = "bucket $bucket B · payload $payload B · padding ${bucket - payload} B"
+        if (type == Frame.T_MESSAGE && wire.size > 10) {
+            val sig = wire[5].toInt() and 0xff
+            val kind = if (sig == 3) "PreKey (PQXDH)" else if (sig == 2) "Triple Ratchet" else "type $sig"
+            return "$base · libsignal $kind"
+        }
+        return base
+    }
+
+    /** Classic hex dump: offset, 16 bytes hex, ASCII column. */
+    fun hexDump(b: ByteArray, maxBytes: Int = b.size, ascii: Boolean = true): String {
+        val n = minOf(maxBytes, b.size)
+        val sb = StringBuilder(n * 4 + 64)
+        var off = 0
+        while (off < n) {
+            sb.append("%08x  ".format(off))
+            for (i in 0 until 16) {
+                if (off + i < n) sb.append("%02x ".format(b[off + i].toInt() and 0xff)) else sb.append("   ")
+                if (i == 7) sb.append(' ')
+            }
+            if (ascii) {
+                sb.append(" |")
+                for (i in 0 until 16) if (off + i < n) {
+                    val c = b[off + i].toInt() and 0xff
+                    sb.append(if (c in 0x20..0x7e) c.toChar() else '.')
+                }
+                sb.append('|')
+            }
+            sb.append('\n')
+            off += 16
+        }
+        if (n < b.size) sb.append("… ${b.size - n} more bytes\n")
+        return sb.toString()
     }
 }

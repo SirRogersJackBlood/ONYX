@@ -118,6 +118,30 @@ class CoreTest {
         assertEquals(0, (wire.size - 4 * frames.size) % 1024)
     }
 
+    @Test fun wireTapSeesExactPaddedBytesAndNoPlaintext() {
+        val secret = "super secret plaintext".toByteArray()
+        val bos = ByteArrayOutputStream()
+        val w = FrameCodec(ByteArrayInputStream(ByteArray(0)), bos)
+        val seen = ArrayList<Triple<WireDirection, Int, ByteArray>>()
+        w.tap = { d, t, b -> seen += Triple(d, t, b) }
+        val ct = Bytes.random(183)                       // stands in for libsignal ciphertext
+        w.write(Frame.Message(2, ct))
+        assertEquals(1, seen.size)
+        assertEquals(WireDirection.OUT, seen[0].first)
+        assertArrayEquals(bos.toByteArray(), seen[0].third) // tap == exact bytes on the wire
+        assertEquals(1028, seen[0].third.size)
+        assertFalse(String(seen[0].third, Charsets.ISO_8859_1).contains(String(secret)))
+        val desc = WireAnatomy.describe(seen[0].second, seen[0].third)
+        assertTrue(desc.contains("bucket 1024 B")); assertTrue(desc.contains("Triple Ratchet"))
+        // reader side tap
+        val r = FrameCodec(ByteArrayInputStream(bos.toByteArray()), ByteArrayOutputStream())
+        var inSeen: ByteArray? = null
+        r.tap = { d, _, b -> assertEquals(WireDirection.IN, d); inSeen = b }
+        r.read()
+        assertArrayEquals(bos.toByteArray(), inSeen!!)
+        assertTrue(WireAnatomy.hexDump(inSeen!!, 32).startsWith("00000000  00 00 04 00"))
+    }
+
     @Test fun linkAuthIdentifiesOnlyTheRightContact() {
         val keys = (1..5).map { "c$it" to Bytes.random(32) }
         val nonceS = Bytes.random(32); val nonceC = Bytes.random(32)

@@ -44,6 +44,7 @@ class PeerClient(private val tor: TorController) {
 
     fun open(contact: Contact): PeerLink {
         val (s, codec) = dial(contact.onion)
+        codec.tap = { d, t, b -> WireTap.record(contact.id, d, t, b) }
         try {
             val challenge = codec.expect<Frame.Challenge>()
             val nonceC = Bytes.random(32)
@@ -114,6 +115,7 @@ class PeerServer(
                     is Frame.Hello -> {
                         val all = contacts()
                         val who = LinkAuth.identify(all.map { it to it.linkKey }, nonceS, first) ?: return
+                        codec.tap = { d, t, b -> WireTap.record(who.id, d, t, b) }
                         codec.write(Frame.Welcome(LinkAuth.welcomeTag(who.linkKey, nonceS, first.nonce)))
                         while (true) {
                             when (val f = codec.read()) {

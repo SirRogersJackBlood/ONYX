@@ -4,7 +4,11 @@ package io.github.proteu5.onyx.ui
 import android.app.AlertDialog
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.text.Editable
 import android.text.InputType
+import android.text.TextWatcher
+import android.view.View
+import android.widget.TextView
 import android.view.Gravity
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
@@ -12,6 +16,10 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Toast
 import io.github.proteu5.onyx.core.ForgeRank
+import io.github.proteu5.onyx.core.Padding
+import io.github.proteu5.onyx.core.WireAnatomy
+import io.github.proteu5.onyx.core.WireDirection
+import io.github.proteu5.onyx.net.WireTap
 import io.github.proteu5.onyx.data.Contact
 import io.github.proteu5.onyx.data.Message
 import io.github.proteu5.onyx.data.MsgState
@@ -27,6 +35,11 @@ class ChatActivity : OnyxActivity() {
     private lateinit var threadView: LinearLayout
     private lateinit var scroll: ScrollView
     private lateinit var input: EditText
+    private lateinit var rawScroll: ScrollView
+    private lateinit var rawText: TextView
+    private lateinit var draftLine: TextView
+    private var rawOn = false
+    private val tapListener: (String) -> Unit = { id -> if (id == contactId && rawOn) runOnUiThread { renderRaw() } }
     private val msgListener: (String) -> Unit = { id -> if (id == contactId) runOnUiThread { render() } }
     private val contactListener: () -> Unit = { runOnUiThread { renderHeader() } }
 
@@ -46,11 +59,25 @@ class ChatActivity : OnyxActivity() {
         tools.addView(button("Timer", false) { chooseTimer() }, lp())
         tools.addView(button("Rename", false) { rename() }, lp())
         tools.addView(button("Delete", false) { deleteContact() }, lp())
+        tools.addView(button("RAW", false) { toggleRaw() }, lp())
         root.add(tools)
 
         threadView = vbox().apply { setPadding(dp(12), dp(8), dp(12), dp(8)) }
         scroll = ScrollView(this).apply { addView(threadView) }
         root.addView(scroll, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+
+        // RAW wire view: split screen under the conversation, hidden until toggled.
+        val rawBox = vbox().apply {
+            setPadding(dp(12), dp(8), dp(12), dp(8))
+            background = GradientDrawable().apply { setColor(android.graphics.Color.parseColor("#020608")); setStroke(dp(1), Forge.LINE) }
+        }
+        rawBox.add(text("RAW · WHAT AN INTERCEPTOR WOULD CAPTURE", 10f, Forge.CYAN, mono = true).apply { letterSpacing = 0.12f })
+        draftLine = text("", 10f, Forge.WARN, mono = true)
+        rawBox.add(draftLine, 4)
+        rawText = text("", 9f, Forge.CYAN_DIM, mono = true)
+        rawBox.add(rawText, 6)
+        rawScroll = ScrollView(this).apply { addView(rawBox); visibility = View.GONE }
+        root.addView(rawScroll, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
 
         val bar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(dp(12), dp(8), dp(12), dp(12)); gravity = Gravity.CENTER_VERTICAL }
         input = EditText(this).apply {
@@ -62,6 +89,11 @@ class ChatActivity : OnyxActivity() {
             background = GradientDrawable().apply { cornerRadius = dp(10).toFloat(); setColor(Forge.SURFACE); setStroke(dp(1), Forge.LINE) }
             setPadding(dp(12), dp(10), dp(12), dp(10))
         }
+        input.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) = Unit
+            override fun afterTextChanged(s: Editable?) { if (rawOn) updateDraftLine() }
+        })
         bar.addView(input, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply { marginEnd = dp(8) })
         bar.addView(button("Send") { send() })
         root.add(bar)
@@ -70,13 +102,55 @@ class ChatActivity : OnyxActivity() {
 
     override fun onStart() {
         super.onStart()
-        app.messages.addListener(msgListener); app.contacts.addListener(contactListener)
-        renderHeader(); render()
+        app.messages.addListener(msgListener); app.contacts.addListener(contactListener); WireTap.addListener(tapListener)
+        renderHeader(); render(); if (rawOn) renderRaw()
     }
 
     override fun onStop() {
-        app.messages.removeListener(msgListener); app.contacts.removeListener(contactListener)
+        app.messages.removeListener(msgListener); app.contacts.removeListener(contactListener); WireTap.removeListener(tapListener)
         super.onStop()
+    }
+
+    private fun toggleRaw() {
+        rawOn = !rawOn
+        rawScroll.visibility = if (rawOn) View.VISIBLE else View.GONE
+        if (rawOn) { updateDraftLine(); renderRaw() }
+    }
+
+    /**
+     * Live, while typing: how big the message will be ON THE WIRE. Nothing is encrypted here
+     * (encrypting a draft would advance the ratchet); it's just the padding arithmetic.
+     */
+    private fun updateDraftLine() {
+        val n = input.text.toString().toByteArray(Charsets.UTF_8).size
+        if (n == 0) { draftLine.text = "type a message: its size on the wire updates live"; return }
+        val envelope = n + 26                                   // version, kind, id, minute, length
+        val plainBucket = runCatching { Padding.bucketFor(envelope, Padding.MESSAGE_BUCKETS) }.getOrNull()
+        if (plainBucket == null) { draftLine.text = "draft $n B · too large"; return }
+        val frame = runCatching { Padding.bucketFor(plainBucket + 160, Padding.FRAME_BUCKETS) }.getOrDefault(-1)
+        draftLine.text = "draft $n B → padded to $plainBucket B → encrypted → ≈ ${frame + 4} B frame. " +
+            "A 1-letter message and a ${plainBucket - 27}-byte one look identical."
+    }
+
+    private val timeFmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+
+    private fun renderRaw() {
+        val entries = WireTap.entries(contactId)
+        val sb = StringBuilder()
+        if (entries.isEmpty()) {
+            sb.append("No frames captured yet this session.\nSend or receive a message over Tor and the raw bytes appear here.\n\n")
+        }
+        sb.append("Inside Tor, frames look like this. Your carrier sees even less: TLS to a Tor relay, in fixed 514-byte cells.\n\n")
+        for (e in entries) {
+            val arrow = if (e.dir == WireDirection.OUT) "▲ OUT" else "▼ IN "
+            sb.append("$arrow ${timeFmt.format(Date(e.atMs))}  ${e.typeName}  ${e.wireSize} B\n")
+            sb.append("      ${e.anatomy}\n")
+            sb.append(WireAnatomy.hexDump(e.preview, ascii = false))
+            if (e.wireSize > e.preview.size) sb.append("… ${e.wireSize - e.preview.size} more bytes (ciphertext + zero padding)\n")
+            sb.append('\n')
+        }
+        rawText.text = sb
+        rawScroll.post { rawScroll.fullScroll(View.FOCUS_DOWN) }
     }
 
     private fun renderHeader() {

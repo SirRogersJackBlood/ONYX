@@ -30,6 +30,7 @@ Build metadata (from `output-metadata.json`, preserved alongside):
 - applicationId `io.github.proteu5.onyx` · variant `debug` · versionCode **1** · embedded versionName **`0.1.0-forge`**
 - Build time: 2026-09-26 17:07 (local)
 - Signing: Android debug keystore (development key). **Not for general distribution.**
+- Signer certificate: `CN=Android Debug, O=Android, C=US` · SHA-256 `f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165` (verified identical on all four APKs with apksigner 36.0.0)
 
 > **Note** "pre1" is the release label. The APKs were built before the version bump, so Android's app info still shows `0.1.0-forge`. The version bump below applies from the next build (pre2).
 
@@ -49,7 +50,7 @@ Build metadata (from `output-metadata.json`, preserved alongside):
 - [x] SHA-256 recorded for all four
 - [x] `*.apk` excluded by `.gitignore`, so APKs are **not** committed to the repo; they ship only as Release assets
 - [ ] Upload to the GitHub pre-release and confirm the published hashes match `SHA256SUMS.txt`
-- [ ] Record the signing certificate: `apksigner verify --print-certs onyx-v1.0-pre1-arm64-v8a-debug.apk`
+- [x] Signing certificate recorded: SHA-256 `f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165` (all four APKs)
 
 ## Risk & impact
 

@@ -85,6 +85,7 @@ class OnyxApp : Application() {
         runCatching { snowflake.shutdown() }
         runCatching { messenger.stop() }
         runCatching { tor.stop() }
+        io.github.proteu5.onyx.net.WireTap.clearAll()
         vault.destroy()
         store.wipeAll(this)
         filesDir.deleteRecursively()

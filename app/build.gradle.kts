@@ -12,8 +12,8 @@ android {
         applicationId = "io.github.proteu5.onyx"
         minSdk = 30          // Android 11: BiometricPrompt authenticators, scoped storage, TLS 1.3
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.0-pre2"
+        versionCode = 3
+        versionName = "1.1.0"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
     }
 
