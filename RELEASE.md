@@ -1,8 +1,8 @@
-# ONYX v0.1.0 "Forge": preview release
+# ONYX v1.0.0-pre1 "Forge": pre-release
 
-> **Preview build.** Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source and will **not** upgrade over this build. Uninstall the preview first; this deletes its data.
+> **Pre-release (debug build).** Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source and will **not** upgrade over this build. Uninstall the preview first; this deletes its data.
 
-🌐 **Website:** [ONYX · Private messaging over Tor](https://0nyx.up.railway.app/), with docs, verification steps and downloads.
+🌐 **Website:** [ONYX · Private messaging over Tor](https://0nyx.up.railway.app/), with docs, verification steps and downloads. **Source:** [https://github.com/SirRogersJackBlood/ONYX](https://github.com/SirRogersJackBlood/ONYX)
 
 ## Highlights
 
@@ -32,24 +32,36 @@
 
 ## Downloads
 
-| File | For |
-|---|---|
-| `onyx-0.1.0-forge-arm64-v8a.apk` | Almost all phones since 2017. **Pick this if unsure.** |
-| `onyx-0.1.0-forge-armeabi-v7a.apk` | Older 32-bit phones |
-| `onyx-0.1.0-forge-x86_64.apk` | Emulators |
+From **[GitHub Releases](https://github.com/SirRogersJackBlood/ONYX/releases)**:
+
+| File | For | Size |
+|---|---|---|
+| `onyx-v1.0-pre1-arm64-v8a-debug.apk` | Almost all phones since 2017. **Pick this if unsure.** | 238.7 MB |
+| `onyx-v1.0-pre1-armeabi-v7a-debug.apk` | Older 32-bit phones | 222.9 MB |
+| `onyx-v1.0-pre1-x86_64-debug.apk` | Emulators | 244.8 MB |
+| `onyx-v1.0-pre1-universal-debug.apk` | Any device (largest) | 607.9 MB |
+
+These are **debug** builds and are large because they keep full native debug symbols. Release builds will be far smaller.
 
 ### Verify before installing
 
 ```text
-SHA-256
-<fill in: Get-FileHash .\onyx-0.1.0-forge-arm64-v8a.apk -Algorithm SHA256>
+0a04ed83a2981b34c9e83dac666e3f007eacd817419eb504c1d8e446c438d07c  onyx-v1.0-pre1-arm64-v8a-debug.apk
+dc94ec33ce2e06b5b788d1a2a54fbddc5c78eba3b543d4214afce02dbd32a583  onyx-v1.0-pre1-armeabi-v7a-debug.apk
+92219a72683c5b59149a4d5e46ca97ef887d6b19df337eca53567a624804a8cc  onyx-v1.0-pre1-x86_64-debug.apk
+f3192e6e6f17c0cdc67ce461dfcfa3ec48e6725e308cded5d4298cc423b24ed9  onyx-v1.0-pre1-universal-debug.apk
+```
+
+```powershell
+Get-FileHash .\onyx-v1.0-pre1-arm64-v8a-debug.apk -Algorithm SHA256
 ```
 
 ```bash
-apksigner verify --print-certs onyx-0.1.0-forge-arm64-v8a.apk
+sha256sum -c SHA256SUMS.txt
+apksigner verify --print-certs onyx-v1.0-pre1-arm64-v8a-debug.apk
 ```
 
-Signing certificate SHA-256: `<fill in>`
+Signing: Android **debug** key (development only). Android shows the version as `0.1.0-forge` (versionCode 1); builds from pre2 onward show `1.0.0-pre2`.
 
 ## Known limitations
 

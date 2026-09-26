@@ -1,6 +1,8 @@
 {
-  "version": "0.1.0-forge",
+  "version": "1.0.0-pre1",
   "channel": "preview",
-  "notes": "Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source.",
-  "signer_sha256": ""
+  "notes": "Debug-signed pre-release for testing. The F-Droid release will be built and signed by F-Droid from source.",
+  "signer_sha256": "",
+  "repo_url": "https://github.com/SirRogersJackBlood/ONYX",
+  "releases_url": "https://github.com/SirRogersJackBlood/ONYX/releases"
 }

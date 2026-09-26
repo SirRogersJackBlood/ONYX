@@ -36,6 +36,7 @@ function nav(active = '') {
     ${link('/#privacy', 'Privacy', 'privacy')}
     ${link('/docs', 'Docs', 'docs')}
     ${link('/#download', 'Download', 'download')}
+    <a href="https://github.com/SirRogersJackBlood/ONYX" rel="noopener noreferrer">Source</a>
   </nav>
 </header>`;
 }
@@ -48,6 +49,7 @@ function footer() {
   </div>
   <div class="footer-meta">
     <p>ONYX is free software under the GNU AGPL-3.0.</p>
+    <p><a href="https://github.com/SirRogersJackBlood/ONYX" rel="noopener noreferrer">Source on GitHub</a> · <a href="https://github.com/SirRogersJackBlood/ONYX/releases" rel="noopener noreferrer">Releases</a></p>
     <p class="mono dim">This site sets no cookies, runs no JavaScript, loads nothing from third parties and keeps no request logs.</p>
   </div>
 </footer>`;
@@ -60,9 +62,18 @@ function landing({ apks, manifest, screenshots, docs }) {
   const preview = (manifest.channel || '').toLowerCase() !== 'stable';
   const version = manifest.version ? ` ${e(manifest.version)}` : '';
 
-  const heroCta = latest
-    ? `<a class="btn primary" href="#download">Download APK${version}</a>`
+  const releasesUrl = manifest.releases_url || '';
+  const heroCta = (latest || releasesUrl)
+    ? `<a class="btn primary" href="#download">Download${version}</a>`
     : `<span class="btn primary disabled">F-Droid release coming</span>`;
+  const ghBlock = releasesUrl ? `
+    <div class="apk gh">
+      <div class="apk-head">
+        <a class="btn primary" href="${e(releasesUrl)}" rel="noopener noreferrer">GitHub Releases${version}</a>
+        <span class="mono dim">APKs per device type · SHA-256 in the release notes</span>
+      </div>
+      ${manifest.repo_url ? `<p class="dim small">Source: <a href="${e(manifest.repo_url)}" rel="noopener noreferrer">${e(manifest.repo_url.replace('https://', ''))}</a></p>` : ''}
+    </div>` : '';
 
   const gallery = screenshots.length
     ? `<div class="gallery">${screenshots.map((s) => `<figure><a href="${s.src}"><img src="${s.src}" alt="${e(s.alt)}" loading="lazy"></a><figcaption>${e(s.alt)}</figcaption></figure>`).join('')}</div>`
@@ -77,11 +88,11 @@ function landing({ apks, manifest, screenshots, docs }) {
         <div class="hash"><span class="mono dim">SHA-256</span><code>${a.sha256}</code></div>
       </div>`).join('');
 
-  const downloadBlock = apks.length ? `
+  const downloadBlock = (apks.length || releasesUrl) ? `
     ${preview ? `<div class="callout warning"><p><strong>Preview build.</strong> ${e(manifest.notes || 'Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source.')}</p></div>` : ''}
-    <div class="apks">${apkRows}</div>
+    <div class="apks">${ghBlock}${apkRows}</div>
     ${manifest.signer_sha256 ? `<div class="hash signer"><span class="mono dim">SIGNING CERT SHA-256</span><code>${e(manifest.signer_sha256)}</code></div>` : ''}
-    <p class="dim">Most phones since 2017 need <strong>arm64-v8a</strong>. All hashes: <a href="/SHA256SUMS">/SHA256SUMS</a></p>`
+    <p class="dim">Most phones since 2017 need <strong>arm64-v8a</strong>.${apks.length ? ' Hashes of files hosted here: <a href="/SHA256SUMS">/SHA256SUMS</a>' : ''}</p>`
     : `<p class="dim">No build published yet. ONYX will be available on F-Droid.</p>`;
 
   const body = `

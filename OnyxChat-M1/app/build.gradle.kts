@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 plugins {
-    // AGP 9 compiles Kotlin itself (built-in Kotlin); no separate kotlin-android plugin.
     id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -12,8 +12,8 @@ android {
         applicationId = "io.github.proteu5.onyx"
         minSdk = 30          // Android 11: BiometricPrompt authenticators, scoped storage, TLS 1.3
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.0-pre2"
+        versionCode = 1
+        versionName = "0.1.0-forge"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64") }
     }
 
@@ -42,11 +42,10 @@ android {
     }
 
     compileOptions {
-        // libsignal needs newer Java APIs (java.time etc.) back-ported via desugaring.
-        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    kotlin { jvmToolchain(17) }
 
     packaging {
         jniLibs { useLegacyPackaging = false }
@@ -61,7 +60,6 @@ android {
 
 dependencies {
     implementation(project(":core"))
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
     // Signal Protocol: PQXDH + Double Ratchet + SPQR (Triple Ratchet). AGPL-3.0.
     // NOTE: newest builds are published to Signal's own repo; 0.86.5 is the latest on Maven Central.

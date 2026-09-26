@@ -1,5 +1,7 @@
 # Install & verify
 
+Download from **[GitHub Releases](https://github.com/SirRogersJackBlood/ONYX/releases)**. Each release lists the SHA-256 of every APK.
+
 ## Which file do I need?
 
 ONYX ships one APK per processor type to keep downloads small:

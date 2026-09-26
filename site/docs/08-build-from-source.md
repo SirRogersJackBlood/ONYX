@@ -1,5 +1,12 @@
 # Build from source
 
+Source: **[github.com/SirRogersJackBlood/ONYX](https://github.com/SirRogersJackBlood/ONYX)** · Releases: **[/releases](https://github.com/SirRogersJackBlood/ONYX/releases)**
+
+```bash
+git clone https://github.com/SirRogersJackBlood/ONYX.git
+cd ONYX
+```
+
 ## Requirements
 
 | Tool | Version |
