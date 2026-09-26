@@ -7,7 +7,7 @@
 | **Date** | 2026-09-26 |
 | **Requested by** | SirRogersJackBlood |
 | **Previous release** | v1.2.1 (CR-ONYX-2026-003) |
-| **Status** | Code complete: awaiting build, test and publish |
+| **Status** | Released 2026-09-26: GitHub pre-release [`v.1.2.3`](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v.1.2.3) |
 
 ## Rationale
 State plainly who designed, built and tested ONYX, and invite independent security review before the beta.
@@ -23,9 +23,14 @@ State plainly who designed, built and tested ONYX, and invite independent securi
 No protocol, storage or policy changes. Upgrades in place over v1.0–v1.2.1 (same signing key).
 
 ## Test evidence
-- [ ] `.\gradlew :app:assembleDebug` succeeds
+- [x] `.\gradlew :app:assembleDebug` succeeds (after freeing disk space on C:)
 - [ ] About shows `v1.2.3`, `BUILD 6`, ◆ INSTALLED on 1.2.3, CREDITS card, signer `f9eb3fcb…5165`
 - [ ] Chat with a v1.1 / v1.2.1 contact still works
+
+- [x] Staged APK hashes verified against `SHA256SUMS.txt` (4/4)
+- [x] All four APKs signed with `f9eb3fcb…5165` (APK Signature Scheme v2)
+- [x] GitHub asset `onyx-v1.2.3-arm64-v8a-debug.apk` downloaded and hash matches `03bb0952…2630`; all four asset URLs resolve
+- [x] Website updated: release link, per-device downloads and SHA-256 from `site/releases/manifest.json`
 
 ## Release steps
 `.\gradlew :app:assembleDebug` → `.\scripts\stage-release.ps1 -Version 1.2.3` → hashes into release notes → push → GitHub pre-release `v1.2.3`.

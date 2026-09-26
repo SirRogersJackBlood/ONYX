@@ -135,7 +135,10 @@ const server = http.createServer((req, res) => {
   }
 
   if (p === '/SHA256SUMS' || p === '/SHA256SUMS.txt') {
-    const body = listReleases().apks.map((a) => `${a.sha256}  ${a.name}`).join('\n') + '\n';
+    const { apks, manifest } = listReleases();
+    const rows = apks.map((a) => `${a.sha256}  ${a.name}`)
+      .concat((Array.isArray(manifest.assets) ? manifest.assets : []).map((a) => `${a.sha256}  ${a.file}`));
+    const body = rows.join('\n') + '\n';
     return send(res, 200, body, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-cache' });
   }
 

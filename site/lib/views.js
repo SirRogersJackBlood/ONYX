@@ -67,11 +67,12 @@ function landing({ apks, manifest, screenshots, docs }) {
   const heroCta = (latest || releasesUrl)
     ? `<a class="btn primary" href="#download">Download${version}</a>`
     : `<span class="btn primary disabled">F-Droid release coming</span>`;
+  const relUrl = manifest.release_url || releasesUrl;
   const ghBlock = releasesUrl ? `
     <div class="apk gh">
       <div class="apk-head">
-        <a class="btn primary" href="${e(releasesUrl)}" rel="noopener noreferrer">GitHub Releases${version}</a>
-        <span class="mono dim">APKs per device type · SHA-256 in the release notes</span>
+        <a class="btn primary" href="${e(relUrl)}" rel="noopener noreferrer">Release notes${version}</a>
+        <span class="mono dim">${e(manifest.title || 'GitHub release')}${manifest.date ? ` · ${e(manifest.date)}` : ''} · <a href="${e(releasesUrl)}" rel="noopener noreferrer">all releases</a></span>
       </div>
       ${manifest.repo_url ? `<p class="dim small">Source: <a href="${e(manifest.repo_url)}" rel="noopener noreferrer">${e(manifest.repo_url.replace('https://', ''))}</a></p>` : ''}
     </div>` : '';
@@ -89,11 +90,21 @@ function landing({ apks, manifest, screenshots, docs }) {
         <div class="hash"><span class="mono dim">SHA-256</span><code>${a.sha256}</code></div>
       </div>`).join('');
 
+  const ghAssets = Array.isArray(manifest.assets) ? manifest.assets : [];
+  const ghRows = ghAssets.map((a, i) => `
+      <div class="apk">
+        <div class="apk-head">
+          <a class="btn ${i === 0 ? 'primary' : 'ghost'}" href="${e(a.url)}" rel="noopener noreferrer">${e(a.abi === 'universal' ? 'Universal APK' : a.abi)}</a>
+          <span class="mono dim">${e(a.file)}${a.size ? ` · ${fmtSize(a.size)}` : ''}${a.note ? ` · ${e(a.note)}` : ''}</span>
+        </div>
+        <div class="hash"><span class="mono dim">SHA-256</span><code>${e(a.sha256)}</code></div>
+      </div>`).join('');
+
   const downloadBlock = (apks.length || releasesUrl) ? `
     ${preview ? `<div class="callout warning"><p><strong>Preview build.</strong> ${e(manifest.notes || 'Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source.')}</p></div>` : ''}
-    <div class="apks">${ghBlock}${apkRows}</div>
+    <div class="apks">${ghBlock}${ghRows}${apkRows}</div>
     ${manifest.signer_sha256 ? `<div class="hash signer"><span class="mono dim">SIGNING CERT SHA-256</span><code>${e(manifest.signer_sha256)}</code></div>` : ''}
-    <p class="dim">Most phones since 2017 need <strong>arm64-v8a</strong>.${apks.length ? ' Hashes of files hosted here: <a href="/SHA256SUMS">/SHA256SUMS</a>' : ''}</p>`
+    <p class="dim">Most phones since 2017 need <strong>arm64-v8a</strong>.${(apks.length || ghAssets.length) ? ' Plain hash list: <a href="/SHA256SUMS">/SHA256SUMS</a>' : ''}</p>`
     : `<p class="dim">No build published yet. ONYX will be available on F-Droid.</p>`;
 
   const body = `

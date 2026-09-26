@@ -4,5 +4,43 @@
   "notes": "Debug-signed pre-release for testing. The F-Droid release will be built and signed by F-Droid from source.",
   "signer_sha256": "f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165",
   "repo_url": "https://github.com/SirRogersJackBlood/ONYX",
-  "releases_url": "https://github.com/SirRogersJackBlood/ONYX/releases"
+  "releases_url": "https://github.com/SirRogersJackBlood/ONYX/releases",
+  "title": "ONYX v1.2.3 \"Forge\": People, Not Programs",
+  "tag": "v.1.2.3",
+  "release_url": "https://github.com/SirRogersJackBlood/ONYX/releases/tag/v.1.2.3",
+  "date": "2026-09-26",
+  "assets": [
+    {
+      "abi": "arm64-v8a",
+      "file": "onyx-v1.2.3-arm64-v8a-debug.apk",
+      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v.1.2.3/onyx-v1.2.3-arm64-v8a-debug.apk",
+      "sha256": "03bb0952e90aa7cf717a42871df89e4cc89d612a26348cd3a80c261aa2f12630",
+      "size": 238474150,
+      "note": "Almost all phones since 2017. Pick this if unsure."
+    },
+    {
+      "abi": "armeabi-v7a",
+      "file": "onyx-v1.2.3-armeabi-v7a-debug.apk",
+      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v.1.2.3/onyx-v1.2.3-armeabi-v7a-debug.apk",
+      "sha256": "2156b61d4d907f16e12987fd0fcbafbc476dbca8a7d490193d144825aa03d571",
+      "size": 222676022,
+      "note": "Older 32-bit phones"
+    },
+    {
+      "abi": "x86_64",
+      "file": "onyx-v1.2.3-x86_64-debug.apk",
+      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v.1.2.3/onyx-v1.2.3-x86_64-debug.apk",
+      "sha256": "dddd19ad7fcede2b4a5727222ca3beab0dc3a9339bd76e8149f79da681604fe0",
+      "size": 244572338,
+      "note": "Emulators"
+    },
+    {
+      "abi": "universal",
+      "file": "onyx-v1.2.3-universal-debug.apk",
+      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v.1.2.3/onyx-v1.2.3-universal-debug.apk",
+      "sha256": "7282a86a348993fa8fe17095c5db59c67cda3d7b0b726b0e87ce2aefb39c4124",
+      "size": 607675154,
+      "note": "Any device (largest)"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 # Install & verify
 
-Download from **[GitHub Releases](https://github.com/SirRogersJackBlood/ONYX/releases)**. Each release lists the SHA-256 of every APK.
+Download from **[GitHub Releases](https://github.com/SirRogersJackBlood/ONYX/releases)**. Latest pre-release: **[v1.2.3](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v.1.2.3)**. Each release lists the SHA-256 of every APK, and so does the download section on the home page.
 
 ## Which file do I need?
 

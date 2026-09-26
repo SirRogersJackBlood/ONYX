@@ -1,6 +1,6 @@
 # ONYX v1.2.3 "Forge": People, Not Programs (pre-release)
 
-🌐 [0nyx.up.railway.app](https://0nyx.up.railway.app/) · Source: [SirRogersJackBlood/ONYX](https://github.com/SirRogersJackBlood/ONYX) · Previous: [v1.1.0](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v1.1.0)
+🌐 [0nyx.up.railway.app](https://0nyx.up.railway.app/) · Source: [SirRogersJackBlood/ONYX](https://github.com/SirRogersJackBlood/ONYX) · Release: [v.1.2.3](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v.1.2.3) · Previous: [v1.1.0](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v1.1.0)
 
 > **Pre-release (debug build).** Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source and will **not** upgrade over this build.
 >
@@ -62,7 +62,10 @@ ONYX is now deliberately useless as an automated or hidden command channel:
 
 **SHA-256**
 ```text
-<paste v1.2\SHA256SUMS.txt here after staging>
+03bb0952e90aa7cf717a42871df89e4cc89d612a26348cd3a80c261aa2f12630  onyx-v1.2.3-arm64-v8a-debug.apk
+2156b61d4d907f16e12987fd0fcbafbc476dbca8a7d490193d144825aa03d571  onyx-v1.2.3-armeabi-v7a-debug.apk
+dddd19ad7fcede2b4a5727222ca3beab0dc3a9339bd76e8149f79da681604fe0  onyx-v1.2.3-x86_64-debug.apk
+7282a86a348993fa8fe17095c5db59c67cda3d7b0b726b0e87ce2aefb39c4124  onyx-v1.2.3-universal-debug.apk
 ```
 
 **Signing certificate** (`CN=Android Debug, O=Android, C=US`, expected to be the same as previous releases)
