@@ -121,7 +121,9 @@ No Google Play Services, Firebase, analytics or crash reporting.
 
 ## License
 
-**AGPL-3.0-only** (required by libsignal). See [LICENSE](LICENSE).
+- **Code:** AGPL-3.0-only (required by libsignal). See [LICENSE](LICENSE).
+- **Artwork** (raven, emblem, sigil, icons, screenshots): Apache-2.0. See [LICENSE-ASSETS](LICENSE-ASSETS) and [NOTICE](NOTICE).
+- **Trademarks:** ONYX, SirRogersJackBlood, the raven mark and the emblem are trademarks of SirRogersJackBlood. Forks must rebrand. See [TRADEMARKS.md](TRADEMARKS.md).
 
 ---
 

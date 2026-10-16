@@ -1,0 +1,21 @@
+ONYX
+Copyright (C) 2026 SirRogersJackBlood
+
+Source code: GNU Affero General Public License v3.0 only (see LICENSE).
+
+Artwork: Apache License 2.0 (see LICENSE-ASSETS). This covers:
+  app/src/main/res/drawable-nodpi/raven_credit.png
+  app/src/main/res/drawable-nodpi/onyx_emblem.png
+  app/src/main/res/drawable-nodpi/forge_sigil.jpg
+  app/src/main/res/drawable-*/ic_launcher_foreground.png
+  fastlane/metadata/android/en-US/images/  (icon and screenshots)
+  site/public/img/  (emblem, favicon, raven, ring, sigil)
+  site/public/screenshots/
+
+Trademarks: "ONYX" (as the name of this app), "SirRogersJackBlood", the raven
+mark and the ONYX Crucible Engine emblem are trademarks of SirRogersJackBlood.
+The licenses above do not grant trademark rights (see Apache License 2.0,
+section 6). See TRADEMARKS.md.
+
+Third-party libraries keep their own licenses: libsignal (AGPL-3.0),
+tor-android and jtorctl (BSD-3-Clause), IPtProxy, ZXing (Apache-2.0).
