@@ -32,7 +32,7 @@ The new emulator lab found three defects in v1.2.3, one of which destroys user d
 - [x] Emulator lab run 20261016-1740: **65/65 PASS**, 0 WARN (Android 11, 13, 14, 15, 16)
 - [ ] Real devices: Redmi Note 8 and Galaxy S25 Edge install over v1.2.3, chats intact
 - [ ] Manual: Settings → Stop ONYX, reopen, back online without a crash
-- [ ] Hashes, PGP signatures and signing certificate verified after staging
+- [x] Staged hashes match `SHA256SUMS.txt` (4/4); PGP: `SHA256SUMS.txt.asc` and all four `.apk.asc` are Good signatures from `9672 6F1B … 2415 5676`; all four APKs signed with `f9eb3fcb…5165` (v2); dex contains versionName 1.2.4
 
 ## Release steps
 `.\gradlew :app:assembleDebug` → `.\scripts\stage-release.ps1 -Version 1.2.4 -Sign` → verify → push → GitHub pre-release tag `v1.2.4`.

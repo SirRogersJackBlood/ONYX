@@ -51,7 +51,10 @@ Each runs 13 checks: install, launch and Tor bootstrap, rotation, dark mode, off
 
 **SHA-256**
 ```text
-<paste v1.2\SHA256SUMS.txt here after staging>
+611359ec960cad8281af0b45dec32a03eb1f2cdbd9054d285cdc8ea55ff66b91  onyx-v1.2.4-arm64-v8a-debug.apk
+d55a9d531b9fe42da586ab3f7b481161547e969c5748e9bd3973bd4e35f55416  onyx-v1.2.4-armeabi-v7a-debug.apk
+14882f209660a7ac18861eb09617cab2c5305292f718449f2c543115a0c71300  onyx-v1.2.4-universal-debug.apk
+7e7a75179a6c2999664f167b59bc9ef231ed4c82c64815250022c69df9ea772e  onyx-v1.2.4-x86_64-debug.apk
 ```
 
 **PGP** (release key `9672 6F1B CC9F 9D5E 0CED CF9C BC48 B84D 2415 5676`, SirRogersJackBlood <sirrogersjackblood@proton.me>; key at [0nyx.up.railway.app/onyx-release-key.asc](https://0nyx.up.railway.app/onyx-release-key.asc))
