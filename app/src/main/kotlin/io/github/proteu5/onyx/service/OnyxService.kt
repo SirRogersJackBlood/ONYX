@@ -9,7 +9,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
+import android.os.Process
+import io.github.proteu5.onyx.tor.TorController
 import io.github.proteu5.onyx.OnyxApp
 import io.github.proteu5.onyx.R
 import io.github.proteu5.onyx.ui.MainActivity
@@ -27,7 +31,10 @@ class OnyxService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent?.action == ACTION_STOP) {
-            shutdown(); stopSelf(); return START_NOT_STICKY
+            shutdown(); stopSelf()
+            // Tor can't start twice in one process, so end the process: the next launch starts clean.
+            Handler(Looper.getMainLooper()).postDelayed({ Process.killProcess(Process.myPid()) }, 800)
+            return START_NOT_STICKY
         }
         val n = statusNotification("Connecting to Tor…")
         if (Build.VERSION.SDK_INT >= 34) startForeground(ID_STATUS, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
@@ -50,6 +57,13 @@ class OnyxService : Service() {
                 app.snowflake.onTierChanged = { badge -> app.messenger.shareBadgeWithAll(badge) }
                 app.snowflake.start()
                 update("Online · end-to-end encrypted over Tor")
+                return
+            } catch (e: TorController.NeedsProcessRestart) {
+                // Tor already ran and stopped in this process. This service is sticky and still
+                // started, so Android restarts it in a fresh process after we exit.
+                update("Reconnecting to Tor…")
+                Thread.sleep(1_000)
+                Process.killProcess(Process.myPid())
                 return
             } catch (e: Exception) {
                 attempt++

@@ -1,0 +1,4 @@
+03bb0952e90aa7cf717a42871df89e4cc89d612a26348cd3a80c261aa2f12630  onyx-v1.2.3-arm64-v8a-debug.apk
+2156b61d4d907f16e12987fd0fcbafbc476dbca8a7d490193d144825aa03d571  onyx-v1.2.3-armeabi-v7a-debug.apk
+7282a86a348993fa8fe17095c5db59c67cda3d7b0b726b0e87ce2aefb39c4124  onyx-v1.2.3-universal-debug.apk
+dddd19ad7fcede2b4a5727222ca3beab0dc3a9339bd76e8149f79da681604fe0  onyx-v1.2.3-x86_64-debug.apk

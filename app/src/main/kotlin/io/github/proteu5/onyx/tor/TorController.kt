@@ -55,6 +55,9 @@ class TorController(private val context: Context, private val store: SecureStore
     @Synchronized
     fun start(localPort: Int): OnionAddress {
         if (state == State.ONLINE) return onion!!
+        // Tor's C core can run only once per process: a second tor_main aborts (SIGABRT in
+        // hs_circuitmap_init). After Tor has stopped, the caller must restart the process instead.
+        if (torRanInThisProcess) throw NeedsProcessRestart()
         set(State.STARTING)
         try {
             writeTorrc()
@@ -62,6 +65,7 @@ class TorController(private val context: Context, private val store: SecureStore
             bound = context.bindService(Intent(context, TorService::class.java), conn, Context.BIND_AUTO_CREATE)
             check(bound) { "cannot bind TorService" }
             check(connected.await(30, TimeUnit.SECONDS)) { "TorService did not connect" }
+            torRanInThisProcess = true
 
             val svc = service ?: throw IllegalStateException("TorService unavailable")
             val control = waitForBootstrap(svc, 180_000)
@@ -134,7 +138,11 @@ class TorController(private val context: Context, private val store: SecureStore
     /** Destroys our onion identity. A new address will be generated next start. */
     fun forgetOnionKey() = store.delete(NS, KEY)
 
+    /** Thrown by [start] when Tor already ran in this process and cannot be started again in it. */
+    class NeedsProcessRestart : IllegalStateException("Tor already ran in this process; restart the process")
+
     companion object {
+        @Volatile private var torRanInThisProcess = false
         const val VIRTUAL_PORT = 9878
         private const val NS = "tor"
         private const val KEY = "onion-key"

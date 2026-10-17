@@ -129,6 +129,17 @@ class SettingsActivity : OnyxActivity() {
             add(text("SECURITY", 11f, Forge.MUTED, mono = true).apply { letterSpacing = 0.2f }, 24)
             val sec = card()
             sec.add(text("Key storage: " + app.vault.backend(), 14f, Forge.TEXT))
+            if (app.vault.lockMissing()) {
+                sec.add(text("NO SCREEN LOCK", 11f, Forge.DANGER, mono = true).apply { letterSpacing = 0.2f }, 10)
+                sec.add(text("This phone has no PIN, pattern or password. Anyone who picks it up can open ONYX, " +
+                    "and its keys are not tied to a lock. Set a screen lock to protect your messages.", 13f, Forge.DANGER), 4)
+                sec.add(button("Set a screen lock", primary = true) {
+                    startActivity(Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS))
+                }, 8)
+            } else if (!app.vault.lockBound()) {
+                sec.add(text("Key not tied to the screen lock: Android 12-14 would erase it if the lock were ever " +
+                    "removed. It stays in the phone's secure hardware.", 11f, Forge.MUTED), 6)
+            }
             sec.add(text("Protocol: PQXDH (X25519 + ML-KEM-1024) · Triple Ratchet (Double Ratchet + SPQR/ML-KEM-768) · libsignal", 11f, Forge.MUTED, mono = true), 6)
             sec.add(switch("App lock (biometric / device PIN)", app.appLockEnabled) { v -> app.appLockEnabled = v; app.unlocked = true }, 10)
             sec.add(button("Panic wipe", primary = false) { confirmWipe() }, 12)

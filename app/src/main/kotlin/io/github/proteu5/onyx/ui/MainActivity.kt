@@ -28,6 +28,15 @@ class MainActivity : OnyxActivity() {
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1)
         }
         OnyxService.start(this)
+        if (app.consumeResetNotice()) {
+            android.app.AlertDialog.Builder(this)
+                .setTitle("ONYX was reset")
+                .setMessage("Android erased ONYX's protected key. Some Android versions do this when the screen lock " +
+                    "is removed. The messages and contacts stored on this phone could not be recovered, so ONYX " +
+                    "started fresh. Your contacts need to pair with you again.")
+                .setPositiveButton("OK", null)
+                .show()
+        }
 
         val col = vbox().apply { setPadding(dp(18), dp(20), dp(18), dp(28)) }
         col.add(image(R.drawable.onyx_emblem, 132))

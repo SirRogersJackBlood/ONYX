@@ -52,6 +52,7 @@ class OnyxApp : Application() {
         super.onCreate()
         instance = this
         vault = KeystoreVault(this)
+        if (vault.isLost()) resetAfterKeyLoss()
         getSystemService(NotificationManager::class.java).apply {
             createNotificationChannel(NotificationChannel(CH_SERVICE, "Connection status", NotificationManager.IMPORTANCE_MIN).apply {
                 lockscreenVisibility = android.app.Notification.VISIBILITY_SECRET; setShowBadge(false)
@@ -93,8 +94,30 @@ class OnyxApp : Application() {
         noBackupFilesDir.deleteRecursively()
     }
 
+    /**
+     * Android erased the vault's master key (Android 12-14 do this to lock-bound keys when the screen
+     * lock is removed). Nothing stored can ever be decrypted again, so start clean instead of crashing,
+     * and tell the user once.
+     */
+    private fun resetAfterKeyLoss() {
+        vault.destroy()
+        deleteDatabase("onyx.db")
+        filesDir.deleteRecursively()
+        cacheDir.deleteRecursively()
+        noBackupFilesDir.deleteRecursively()
+        noBackupFilesDir.mkdirs()
+        java.io.File(noBackupFilesDir, RESET_NOTICE).writeText("1")
+    }
+
+    /** True once after an automatic reset, so the UI can explain it. */
+    fun consumeResetNotice(): Boolean {
+        val f = java.io.File(noBackupFilesDir, RESET_NOTICE)
+        return f.exists().also { if (it) f.delete() }
+    }
+
     companion object {
         lateinit var instance: OnyxApp; private set
+        private const val RESET_NOTICE = "reset-notice"
         const val CH_SERVICE = "onyx.service"
         const val CH_MESSAGES = "onyx.messages"
         private const val LOCK_AFTER_MS = 30_000L

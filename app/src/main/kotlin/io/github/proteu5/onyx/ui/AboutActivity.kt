@@ -12,6 +12,7 @@ class AboutActivity : OnyxActivity() {
 
     /** Release history shown in the app. Newest first; keep in sync with CHANGELOG.md. */
     private val history = listOf(
+        "1.2.4" to "Reliability: no crash without a screen lock, no data loss when a screen lock is removed (Android 12-14), clean Tor restarts. Tested on Android 11, 13, 14, 15 and 16.",
         "1.2.3" to "Credits on this screen: design, direction & QA by SirRogersJackBlood; development by Claude (Anthropic). Final pre-release before beta.",
         "1.2.1" to "People, not programs: 80-character plain messages, code symbols stripped, rate limit, no attachments. Origin story, and version tracking here.",
         "1.1.0" to "RAW wire view: watch the exact encrypted frames live, plus a size meter while typing.",

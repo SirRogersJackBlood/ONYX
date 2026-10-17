@@ -1,11 +1,22 @@
 # Changelog
 
+## v1.2.4 (pre-release, debug)
+_Reliability release. Three bugs found by the new emulator lab, all fixed and re-tested: 65/65 checks on Android 11, 13, 14, 15 and 16._
+- **Fixed:** crash at first launch on Android 13 and 14 phones with no screen lock: the keystore there refuses lock-bound keys (`setUnlockedDeviceRequired`) without a PIN, pattern or password.
+- **Fixed (data loss):** Android 12-14 permanently erase lock-bound keys when the screen lock is removed, which made every message unreadable and crashed ONYX on each launch. On those versions the vault key now stays in StrongBox/TEE but is not lock-bound; v1.2.x keys are re-wrapped on the next start. Android 11 and 15+ keep the lock binding, and follow the lock being added or removed.
+- **Fixed:** native crash (SIGABRT in Tor) when Tor had to restart, for example after Android restricted ONYX in the background, or reopening ONYX after "Stop ONYX". Tor's core can run only once per process, so ONYX now restarts its process cleanly instead of starting Tor twice.
+- **Added:** if Android has already erased the key, ONYX resets cleanly and explains why once, instead of crash-looping.
+- **Added:** Settings → Security shows a red **NO SCREEN LOCK** warning with a button to set one, and says when the key is not tied to the lock.
+- **Tests:** emulator lab (`scripts/emulator-lab.ps1`): 5 Android versions × 13 checks (install, Tor bootstrap, rotation, dark mode, offline, Doze, memory pressure, restricted background, process death, screen lock added and removed), crash traces saved.
+- **Changed:** versionCode 7, versionName `1.2.4`. Release tags use `v1.2.4` style from now on (F-Droid-compatible).
+- Change record: [`v1.2/CHANGE-RECORD-1.2.4.md`](v1.2/CHANGE-RECORD-1.2.4.md).
+
 ## v1.2.3 (pre-release, debug)
 _Final pre-release before the beta. Includes everything from v1.2.1; the interim 1.2.2 test build was not published._
 - **Added:** CREDITS on the About screen: design, direction & QA by SirRogersJackBlood; development by Claude (Anthropic), AI pair-programmer; dependencies; an invitation for independent security review.
 - **Added:** `SECURITY.md` (private reporting via GitHub Security Advisories). Credits updated in `ABOUT.md`, the website About page and FAQ.
 - **Changed:** versionCode 6, versionName `1.2.3`. Website download info now shows 1.2.3.
-- Change record: [`v1.2/CHANGE-RECORD-1.2.3.md`](v1.2/CHANGE-RECORD-1.2.3.md).
+- Change record: [`v1.2/CHANGE-RECORD-1.2.3.md`](v1.2/v1.2.3/CHANGE-RECORD-1.2.3.md).
 
 ## v1.2.1 (pre-release, debug)
 _v1.2.0 was skipped; its changes ship here._

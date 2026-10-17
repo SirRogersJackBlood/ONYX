@@ -38,6 +38,7 @@ object Forge {
     val MUTED = Color.parseColor("#7C8C95")
     val SILVER = Color.parseColor("#C9CED3")
     val WARN = Color.parseColor("#FFB86B")
+    val DANGER = Color.parseColor("#FF5C6C")
     val MONO: Typeface = Typeface.MONOSPACE
 
     fun coverDrawable(c: ForgeRank.Cover): Int? = when (c) {

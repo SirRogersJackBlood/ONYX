@@ -72,3 +72,6 @@ $RECYCLE.BIN/
 
 # Keep: gradle/wrapper/gradle-wrapper.jar (needed to build)
 !gradle/wrapper/gradle-wrapper.jar
+
+# Emulator lab output (logs may contain test identities)
+lab-results/
