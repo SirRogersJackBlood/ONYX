@@ -7,7 +7,7 @@
 | **Date** | 2026-10-17 |
 | **Requested by** | SirRogersJackBlood |
 | **Previous release** | v1.2.3 (CR-ONYX-2026-004) |
-| **Status** | Code complete and lab-tested: awaiting release build and publish |
+| **Status** | Released 2026-10-17: GitHub pre-release [`v1.2.4`](https://github.com/SirRogersJackBlood/ONYX/releases/tag/v1.2.4) |
 
 ## Rationale
 The new emulator lab found three defects in v1.2.3, one of which destroys user data on Android 12–14.
@@ -30,8 +30,9 @@ The new emulator lab found three defects in v1.2.3, one of which destroys user d
 
 ## Test evidence
 - [x] Emulator lab run 20261016-1740: **65/65 PASS**, 0 WARN (Android 11, 13, 14, 15, 16)
-- [ ] Real devices: Redmi Note 8 and Galaxy S25 Edge install over v1.2.3, chats intact
-- [ ] Manual: Settings → Stop ONYX, reopen, back online without a crash
+- [x] Real devices: Redmi Note 8 and Galaxy S25 Edge install over v1.2.3, chats intact
+- [x] Manual: Settings → Stop ONYX, reopen, back online without a crash
+- [x] GitHub release assets verified: 4 APKs, per-APK `.asc`, `SHA256SUMS.txt` + `.asc` match the staged files; arm64 APK downloaded and hash re-checked
 - [x] Staged hashes match `SHA256SUMS.txt` (4/4); PGP: `SHA256SUMS.txt.asc` and all four `.apk.asc` are Good signatures from `9672 6F1B … 2415 5676`; all four APKs signed with `f9eb3fcb…5165` (v2); dex contains versionName 1.2.4
 
 ## Release steps
