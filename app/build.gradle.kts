@@ -42,7 +42,6 @@ android {
         targetSdk = 36
         versionCode = onyxVersionCode
         versionName = onyxVersionName
-        ndk { abiFilters += buildAbis }
     }
 
     // One APK per ABI keeps F-Droid downloads small (Tor + libsignal + Go natives are large).

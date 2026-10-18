@@ -23,7 +23,7 @@ hidden_service/
 
 # ── Private material ──
 # Raw photos (unblurred onion addresses & QR codes) and scratch
-Res/
+/Res/
 _to_delete/
 
 # ── Build output ──
