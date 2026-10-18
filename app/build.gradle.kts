@@ -67,7 +67,9 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.findByName("release")
+            // -PonyxUnsigned: build exactly what F-Droid builds (unsigned); scripts/build-release.ps1 then signs it
+            // with apksigner, so the published APK = F-Droid's build + a signature block.
+            signingConfig = if (providers.gradleProperty("onyxUnsigned").isPresent) null else signingConfigs.findByName("release")
             // Reproducible builds: no VCS metadata file in the APK.
             vcsInfo { include = false }
             isMinifyEnabled = true

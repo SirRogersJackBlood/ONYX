@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-only
-# Stage debug APKs for a release under change control.
+# Stage debug APKs for a pre-release under change control.
+# Release builds: use scripts/build-release.ps1 instead (F-Droid reproducible signing; see RELEASING.md).
 # Usage (from the repo root):  .\scripts\stage-release.ps1 -Version 1.1.0
 param([Parameter(Mandatory = $true)][string]$Version, [switch]$Release, [switch]$Sign, [string]$SignKey = 'sirrogersjackblood@proton.me')
 $ErrorActionPreference = 'Stop'

@@ -50,3 +50,6 @@ Release keystore and PGP secret key backed up offline (USB). Loss of the release
 The earlier four-APK staging/PGP and emulator-lab entries above describe the original staging run. The corrected public release set contains version codes 81, 82, and 83 only; its exact source is `057ea6f6c220e0d03c5fd96ebc68f30a165c5ac5`. Current checksums and the seven-permission explanation are in [RELEASE-NOTES.md](RELEASE-NOTES.md). No new detached PGP signatures or device-lab run are claimed for the corrected set.
 
 The source fixes restored Android resources and removed conflicting ABI filters. The external signing fix preserves ZIP alignment and disables legacy JAR/v1 metadata; F-Droid successfully copied and verified each corrected release signature. The application manifest's permission declarations were unchanged.
+
+## Reproducibility evidence (2026-10-18)
+- [x] `scripts/build-release.ps1` on Windows rebuilt all three APKs from source and they are **byte-identical** to the published v1.3.0 set (`a5cb75…`, `728152…`, `433822…`). Root cause of the earlier mismatch: `apksigner` rewrites zip padding unless `--alignment-preserved` is passed. Process documented in `RELEASING.md`.
