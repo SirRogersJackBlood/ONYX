@@ -1,7 +1,7 @@
 {
   "version": "1.2.4",
   "channel": "preview",
-  "notes": "Debug-signed pre-release for testing. The F-Droid release will be built and signed by F-Droid from source.",
+  "notes": "Debug-signed pre-release for testing. v1.3.0 will be the first release-signed build, with the app ID it will have on F-Droid: it installs as a new app, so you pair your contacts again once.",
   "signer_sha256": "f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165",
   "repo_url": "https://github.com/SirRogersJackBlood/ONYX",
   "releases_url": "https://github.com/SirRogersJackBlood/ONYX/releases",

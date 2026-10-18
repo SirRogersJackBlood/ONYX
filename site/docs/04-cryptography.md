@@ -185,8 +185,8 @@ Timestamps inside messages are rounded down to the minute before encryption, so 
 
 ```text
 Android Keystore (StrongBox secure element if present, else TEE)
-└── masterKey: AES-256-GCM, non-exportable, usable only after first unlock since boot
-    └── wraps DEK (random 256-bit)             → vault/dek.bin = len(iv) || iv || GCM(masterKey, DEK)
+└── masterKey: AES-256-GCM, non-exportable (lock-bound where safe, see below)
+    └── wraps DEK (random 256-bit)             → vault/dek.bin = "OX" 2 || len(alias) || alias || len(iv) || iv || GCM(masterKey, DEK)
         ├── indexKey = HKDF(DEK, "ONYX-vault-v1", "index")
         └── every record:
               ns_h = HMAC(indexKey, "ns" || namespace)[0..16]
@@ -200,7 +200,10 @@ Design choices:
 - **The AAD binds each value to its row.** Ciphertext can't be moved to another row or namespace without failing authentication.
 - **No timestamps on disk.** Row ordering uses a local counter, not a clock.
 - **Secure delete.** SQLite's `secure_delete` pragma overwrites freed pages, so disappearing messages don't linger in free space.
-- **Hardware binding.** The master key is generated inside the Keystore with `setUnlockedDeviceRequired(true)`. It never exists in app memory and can't be copied off the device.
+- **Hardware binding.** The master key is generated inside the Keystore (StrongBox first, then TEE). It never exists in app memory and can't be copied off the device.
+- **Screen-lock binding, where it is safe.** On Android 11 and 15+ with a screen lock, the key is created with `setUnlockedDeviceRequired(true)`: unusable until the phone has been unlocked once since boot. Android 12–14 permanently erase such keys when the screen lock is removed, which would destroy every message, so on those versions the key stays in secure hardware but is not lock-bound. Without any screen lock the key can't be lock-bound either, and Settings → Security shows a red **NO SCREEN LOCK** warning.
+- **Re-binding is atomic.** When the right binding changes (a lock is added or removed, or an older key is found on Android 12–14), the DEK is re-wrapped under a new master key. `dek.bin` names the master key that wraps it, and the old key is deleted only after the new file is in place, so an interruption can't lose data.
+- **Erased keys fail safe.** If Android has already erased the master key, the vault can never be decrypted. ONYX then resets to a clean state and explains why once, instead of crashing.
 - **Panic wipe order.** The master key is destroyed *first*. Even if deleting files is interrupted, the remaining ciphertext is permanently unreadable.
 
 Why not SQLCipher? It encrypts pages but still needs its own key-management layer, and it adds a large native dependency. The per-record design above uses only platform primitives, hides index values, and plugs into the same `KeyVault` interface a future hypervisor-isolated vault will implement.

@@ -40,6 +40,14 @@ Only people you chat with, inside the encrypted session, and only if you enable 
 
 Your identity and messages are only on that phone and there's no cloud backup, on purpose. You'd pair with your contacts again. If the phone was locked, the data is protected by the hardware-held key.
 
+## What if my phone has no screen lock?
+
+ONYX works, but Settings → Security shows a red **NO SCREEN LOCK** warning: anyone who picks up the phone can open ONYX. Set a PIN, pattern or password, and turn on ONYX's app lock. See [Cryptography](cryptography#storage-the-vault) for how the vault key is tied to the lock on each Android version.
+
+## How is ONYX tested?
+
+The protocol core has unit tests against published vectors and real injection payloads. Every release is also run through an emulator lab: five devices from Android 11 to 16, 13 checks each, including going offline, battery saving, background limits, the app being killed, and the screen lock being added and removed. It's in the repo (`scripts/emulator-lab.ps1`), so anyone can rerun it. On top of that, each release is installed on real phones.
+
 ## What's on the roadmap?
 
 - Mailbox mode (offline delivery via your own always-on device)

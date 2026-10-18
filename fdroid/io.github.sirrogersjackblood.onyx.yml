@@ -1,0 +1,61 @@
+Categories:
+  - Connectivity
+  - Internet
+License: AGPL-3.0-only
+AuthorName: SirRogersJackBlood
+AuthorEmail: sirrogersjackblood@proton.me
+WebSite: https://0nyx.up.railway.app
+SourceCode: https://github.com/SirRogersJackBlood/ONYX
+IssueTracker: https://github.com/SirRogersJackBlood/ONYX/issues
+Changelog: https://github.com/SirRogersJackBlood/ONYX/blob/HEAD/CHANGELOG.md
+
+AutoName: ONYX
+
+RepoType: git
+Repo: https://github.com/SirRogersJackBlood/ONYX.git
+
+Builds:
+  - versionName: 1.3.0
+    versionCode: 81
+    commit: v1.3.0
+    subdir: app
+    ndk: 30.0.16248370
+    gradle:
+      - yes
+    gradleprops:
+      - onyxAbi=armeabi-v7a
+    binary: https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/onyx-v1.3.0-armeabi-v7a-release.apk
+
+  - versionName: 1.3.0
+    versionCode: 82
+    commit: v1.3.0
+    subdir: app
+    ndk: 30.0.16248370
+    gradle:
+      - yes
+    gradleprops:
+      - onyxAbi=arm64-v8a
+    binary: https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/onyx-v1.3.0-arm64-v8a-release.apk
+
+  - versionName: 1.3.0
+    versionCode: 83
+    commit: v1.3.0
+    subdir: app
+    ndk: 30.0.16248370
+    gradle:
+      - yes
+    gradleprops:
+      - onyxAbi=x86_64
+    binary: https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/onyx-v1.3.0-x86_64-release.apk
+
+# SHA-256 of the ONYX release signing certificate (lowercase hex, no colons).
+AllowedAPKSigningKeys: dc2130161e6ce3f7e0fc355bbf733fbe169170f59b6a24223a04d31cf7102e9e
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9]+\.[0-9]+\.[0-9]+$
+VercodeOperation:
+  - 10*%c+1
+  - 10*%c+2
+  - 10*%c+3
+UpdateCurrentVersion: 1.3.0
+CurrentVersionCode: 83

@@ -20,7 +20,7 @@ A privacy tool is only as honest as its threat model. This page says who ONYX de
 | A stranger who learns your `.onion` | Connect to it | A socket that closes silently. They can't confirm it's ONYX or that you're online for anyone in particular. |
 | Someone with the QR code after it expired | Try to pair | Nothing. Codes are single-use, expire after 10 minutes and exist only in memory. |
 | Network attacker during pairing | Intercept or modify Tor traffic | Can't substitute keys, because the identity commitment is in the QR and was read in person. |
-| Thief with your locked phone | Image the storage | Ciphertext whose key lives in the secure element and is unusable before first unlock. |
+| Thief with your locked phone | Image the storage | Ciphertext whose key never leaves the phone's secure hardware. On Android 11 and 15+ with a screen lock, the key is also unusable until the phone is unlocked once after boot. |
 | Future quantum computer + recorded traffic | Break X25519 / Ed25519 | Tor routing metadata only. Message keys also depend on Kyber and ML-KEM. |
 
 ## What ONYX does NOT protect against
@@ -55,6 +55,7 @@ These are real and on the roadmap:
 - **Both phones must be online** for direct delivery. *Planned:* a mailbox mode, where an always-on device of the recipient's (an old phone on Wi-Fi) holds messages.
 - **Loopback listener.** Other apps on the same phone can connect to ONYX's local port. They are rejected by link auth, but a Unix-domain socket would remove the surface entirely. *Planned.*
 - **Tor is not post-quantum.** That is upstream work in the Tor Project.
+- **Screen-lock binding varies by Android version.** On Android 12–14 the vault key is not tied to the screen lock, because those versions erase lock-bound keys when the lock is removed. With no screen lock at all, anyone holding the phone can open ONYX; set a PIN, pattern or password, and use the app lock.
 
 ## Abuse resistance
 

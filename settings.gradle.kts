@@ -12,11 +12,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        // Guardian Project Maven (tor-android). Scoped to their group only; jtorctl and
-        // other info.guardianproject artifacts may also resolve from Maven Central above.
-        maven("https://raw.githubusercontent.com/guardianproject/gpmaven/master") {
-            content { includeGroup("info.guardianproject") }
-        }
+        // Only Google Maven and Maven Central: both are on F-Droid's trusted-repository list.
+        // tor-android and jtorctl are published to Maven Central.
     }
 }
 

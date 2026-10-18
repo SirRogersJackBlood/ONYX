@@ -49,7 +49,7 @@ function footer() {
     <div><div class="mono dim">DESIGN BY</div><div class="mono">SIRROGERSJACKBLOOD</div></div>
   </div>
   <div class="footer-meta">
-    <p>ONYX is free software under the GNU AGPL-3.0.</p>
+    <p>ONYX is free software: code under the GNU AGPL-3.0, artwork under Apache-2.0. ONYX and the raven mark are trademarks of SirRogersJackBlood.</p>
     <p><a href="https://github.com/SirRogersJackBlood/ONYX" rel="noopener noreferrer">Source on GitHub</a> · <a href="https://github.com/SirRogersJackBlood/ONYX/releases" rel="noopener noreferrer">Releases</a></p>
     <p class="mono dim">This site sets no cookies, runs no JavaScript, loads nothing from third parties and keeps no request logs.</p>
   </div>

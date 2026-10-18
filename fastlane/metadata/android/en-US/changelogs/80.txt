@@ -1,0 +1,1 @@
+Reliability and F-Droid readiness. No crash without a screen lock; no data loss when a screen lock is removed on Android 12-14; clean Tor restarts. New app ID (io.github.sirrogersjackblood.onyx): install fresh and pair contacts again. Tested on Android 11, 13, 14, 15 and 16.

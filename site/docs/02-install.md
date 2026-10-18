@@ -61,7 +61,7 @@ sha256sum -c --ignore-missing SHA256SUMS.txt      # Linux / macOS
 
 On Windows, Gpg4win (Kleopatra) runs the same `gpg` commands; then compare `Get-FileHash` with the line for your file. Each APK also has its own `.apk.asc` signature on the release.
 
-> **Warning** Preview builds are signed with a development key. The F-Droid release will be signed by F-Droid and will **not** upgrade over a preview install. Uninstall the preview first (this deletes its data).
+> **Warning** Pre-releases up to v1.2.4 are signed with a development key and use the app ID `io.github.proteu5.onyx`. From **v1.3.0**, ONYX is signed with its release key and uses `io.github.sirrogersjackblood.onyx`, the ID it will have on F-Droid. Android treats v1.3.0 as a new app: install it, pair your contacts again, then uninstall the old one.
 
 ## Install
 

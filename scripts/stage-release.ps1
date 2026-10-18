@@ -1,20 +1,21 @@
 # SPDX-License-Identifier: AGPL-3.0-only
 # Stage debug APKs for a release under change control.
 # Usage (from the repo root):  .\scripts\stage-release.ps1 -Version 1.1.0
-param([Parameter(Mandatory = $true)][string]$Version, [switch]$Sign, [string]$SignKey = 'sirrogersjackblood@proton.me')
+param([Parameter(Mandatory = $true)][string]$Version, [switch]$Release, [switch]$Sign, [string]$SignKey = 'sirrogersjackblood@proton.me')
 $ErrorActionPreference = 'Stop'
 
-$src  = 'app\build\outputs\apk\debug'
+$type = if ($Release) { 'release' } else { 'debug' }   # -Release: signed release build (.\gradlew :app:assembleRelease)
+$src  = "app\build\outputs\apk\$type"
 $dest = "v$($Version -replace '^(\d+\.\d+).*','$1')"     # 1.1.0 -> v1.1
 New-Item -ItemType Directory -Force -Path $dest | Out-Null
 
-$apks = Get-ChildItem "$src\app-*-debug.apk"
-if (-not $apks) { throw "No debug APKs in $src. Run .\gradlew :app:assembleDebug first." }
+$apks = Get-ChildItem "$src\app-*-$type.apk"
+if (-not $apks) { throw "No $type APKs in $src. Run .\gradlew :app:assemble$((Get-Culture).TextInfo.ToTitleCase($type)) first." }
 
 $lines = @()
 foreach ($a in $apks) {
-    $abi    = $a.BaseName -replace '^app-','' -replace '-debug$',''
-    $target = Join-Path $dest "onyx-v$Version-$abi-debug.apk"
+    $abi    = $a.BaseName -replace '^app-','' -replace "-$type$",''
+    $target = Join-Path $dest "onyx-v$Version-$abi-$type.apk"
     if (Test-Path $target) { throw "$target already exists (no-clobber). Remove it or bump the version." }
     Move-Item $a.FullName $target
     $h = (Get-FileHash $target -Algorithm SHA256).Hash.ToLower()

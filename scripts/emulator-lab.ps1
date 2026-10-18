@@ -10,7 +10,7 @@ param(
     [Parameter(Mandatory = $true)][string]$Apk,
     [switch]$Setup,
     [string]$Only = '',
-    [string]$Package = 'io.github.proteu5.onyx',
+    [string]$Package = 'io.github.sirrogersjackblood.onyx',
     [int]$TorWaitSec = 90
 )
 $ErrorActionPreference = 'Stop'
