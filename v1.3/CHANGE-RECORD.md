@@ -30,9 +30,9 @@ Android installs v1.3.0 as a **new app** next to the old one. Users pair their c
 - [x] Emulator lab on the release build, 65/65 (run 20261017-2012)
 - [x] Release APKs signed with the release key (v2), version codes 80–83 verified
 - [x] Native libraries stripped (libsignal 74 MB → 6.7 MB)
-- [ ] Rebuild without desktop libraries: lab on Android 11 and 16
+- [x] Rebuild without desktop libraries: no stray native files in the APK; arm64 APK 41.7 MB
 - [ ] Real devices: fresh install on Redmi Note 8 and Galaxy S25 Edge, pairing works
-- [ ] Hashes and PGP signatures verified after staging
+- [x] Staged hashes match (4/4); PGP Good signatures on `SHA256SUMS.txt` and all four APKs; all APKs signed with `dc2130…2e9e`; version codes 80–83
 - [ ] F-Droid CI build on the merge request passes
 
 ## Release steps

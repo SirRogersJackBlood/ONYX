@@ -1,52 +1,52 @@
 {
-  "version": "1.2.4",
+  "version": "1.3.0",
   "channel": "preview",
-  "notes": "Debug-signed pre-release for testing. v1.3.0 will be the first release-signed build, with the app ID it will have on F-Droid: it installs as a new app, so you pair your contacts again once.",
-  "signer_sha256": "f9eb3fcbbc2115fb3b5dcd67e842e62d80c4c2afa85dd4c5401dbdcca2ee5165",
+  "notes": "Pre-release, signed with the ONYX release key. New app ID from v1.3.0: it installs next to older pre-releases, so pair your contacts again once, then uninstall the old app.",
+  "signer_sha256": "dc2130161e6ce3f7e0fc355bbf733fbe169170f59b6a24223a04d31cf7102e9e",
   "repo_url": "https://github.com/SirRogersJackBlood/ONYX",
   "releases_url": "https://github.com/SirRogersJackBlood/ONYX/releases",
-  "title": "ONYX v1.2.4 \"Forge\": Hardened on Every Android",
-  "tag": "v1.2.4",
-  "release_url": "https://github.com/SirRogersJackBlood/ONYX/releases/tag/v1.2.4",
-  "date": "2026-10-17",
+  "title": "ONYX v1.3.0 \"Forge\": Release-Signed, F-Droid Bound",
+  "tag": "v1.3.0",
+  "release_url": "https://github.com/SirRogersJackBlood/ONYX/releases/tag/v1.3.0",
+  "date": "2026-10-18",
   "assets": [
     {
       "abi": "arm64-v8a",
-      "file": "onyx-v1.2.4-arm64-v8a-debug.apk",
-      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.2.4/onyx-v1.2.4-arm64-v8a-debug.apk",
-      "sha256": "611359ec960cad8281af0b45dec32a03eb1f2cdbd9054d285cdc8ea55ff66b91",
-      "size": 238490534,
+      "file": "onyx-v1.3.0-arm64-v8a-release.apk",
+      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/onyx-v1.3.0-arm64-v8a-release.apk",
+      "sha256": "0c6a476c8d83edc6be30b0527671d0c885baff44311a596fc67834e17ff0055f",
+      "size": 41695558,
       "note": "Almost all phones since 2017. Pick this if unsure."
     },
     {
       "abi": "armeabi-v7a",
-      "file": "onyx-v1.2.4-armeabi-v7a-debug.apk",
-      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.2.4/onyx-v1.2.4-armeabi-v7a-debug.apk",
-      "sha256": "d55a9d531b9fe42da586ab3f7b481161547e969c5748e9bd3973bd4e35f55416",
-      "size": 222692406,
+      "file": "onyx-v1.3.0-armeabi-v7a-release.apk",
+      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/onyx-v1.3.0-armeabi-v7a-release.apk",
+      "sha256": "c261962aa35f97ff8edefac12539782677272ddd6f331694048fc28424aaf802",
+      "size": 37300696,
       "note": "Older 32-bit phones"
     },
     {
       "abi": "x86_64",
-      "file": "onyx-v1.2.4-x86_64-debug.apk",
-      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.2.4/onyx-v1.2.4-x86_64-debug.apk",
-      "sha256": "7e7a75179a6c2999664f167b59bc9ef231ed4c82c64815250022c69df9ea772e",
-      "size": 244588722,
+      "file": "onyx-v1.3.0-x86_64-release.apk",
+      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/onyx-v1.3.0-x86_64-release.apk",
+      "sha256": "29bac7f87cdeb70f801184297836040c8610a28433c4264d6566474377bdda91",
+      "size": 45925973,
       "note": "Emulators"
     },
     {
       "abi": "universal",
-      "file": "onyx-v1.2.4-universal-debug.apk",
-      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.2.4/onyx-v1.2.4-universal-debug.apk",
-      "sha256": "14882f209660a7ac18861eb09617cab2c5305292f718449f2c543115a0c71300",
-      "size": 607691538,
+      "file": "onyx-v1.3.0-universal-release.apk",
+      "url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/onyx-v1.3.0-universal-release.apk",
+      "sha256": "d4657204f76ce8f3fe4b4d82ca74cb25a7332f7a547112acdacb1c6f687d380f",
+      "size": 122079247,
       "note": "Any device (largest)"
     }
   ],
   "pgp": {
     "fingerprint": "9672 6F1B CC9F 9D5E 0CED CF9C BC48 B84D 2415 5676",
     "key_url": "/onyx-release-key.asc",
-    "sums_url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.2.4/SHA256SUMS.txt",
-    "sig_url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.2.4/SHA256SUMS.txt.asc"
+    "sums_url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/SHA256SUMS.txt",
+    "sig_url": "https://github.com/SirRogersJackBlood/ONYX/releases/download/v1.3.0/SHA256SUMS.txt.asc"
   }
 }

@@ -44,7 +44,10 @@ Release build, emulator lab: **65/65** on Android 11, 13, 14, 15 and 16 (`script
 
 **SHA-256**
 ```text
-<paste v1.3\SHA256SUMS.txt here after staging>
+0c6a476c8d83edc6be30b0527671d0c885baff44311a596fc67834e17ff0055f  onyx-v1.3.0-arm64-v8a-release.apk
+c261962aa35f97ff8edefac12539782677272ddd6f331694048fc28424aaf802  onyx-v1.3.0-armeabi-v7a-release.apk
+d4657204f76ce8f3fe4b4d82ca74cb25a7332f7a547112acdacb1c6f687d380f  onyx-v1.3.0-universal-release.apk
+29bac7f87cdeb70f801184297836040c8610a28433c4264d6566474377bdda91  onyx-v1.3.0-x86_64-release.apk
 ```
 
 **PGP** (release key `9672 6F1B CC9F 9D5E 0CED CF9C BC48 B84D 2415 5676`, SirRogersJackBlood <sirrogersjackblood@proton.me>; key at [0nyx.up.railway.app/onyx-release-key.asc](https://0nyx.up.railway.app/onyx-release-key.asc))
