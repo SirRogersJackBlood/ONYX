@@ -1,0 +1,3 @@
+a5cb75666c3666ffc8762e8fcc5e1931d020160be666cf549bfc7b5b9f7d28fd  onyx-v1.3.0-armeabi-v7a-release.apk
+7281527501cf014faa6bca6306499b2e33c9d55445d3b5d24ee7ac8fccf3f56a  onyx-v1.3.0-arm64-v8a-release.apk
+433822a09bcc349cb29fb5500c3bed902ea2eb5bed804334cae44da4208de884  onyx-v1.3.0-x86_64-release.apk
