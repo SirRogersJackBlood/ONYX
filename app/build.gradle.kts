@@ -96,7 +96,12 @@ android {
             // libsignal-android also ships an 80 MB test-only build of its native library; never ship it.
             excludes += "**/libsignal_jni_testing.so"
         }
-        resources { excludes += listOf("META-INF/*.version", "META-INF/*.kotlin_module", "DebugProbesKt.bin") }
+        resources {
+            excludes += listOf("META-INF/*.version", "META-INF/*.kotlin_module", "DebugProbesKt.bin")
+            // libsignal's Java jar carries its desktop native libraries (macOS, Windows, Linux) as resources.
+            // Useless on Android, and prebuilt blobs F-Droid's scanner flags.
+            excludes += listOf("**/*.dylib", "**/*.dll", "libsignal_jni*.so", "signal_jni*.so")
+        }
     }
 
     lint {

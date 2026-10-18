@@ -1,13 +1,16 @@
 # Changelog
 
-## v1.3.0 (unreleased)
-_First release-signed build and F-Droid submission._
+## v1.3.0 (pre-release, release-signed)
+_First release-signed build, and the version submitted to F-Droid._
 - **Changed (breaking):** application ID is now `io.github.sirrogersjackblood.onyx` (was `io.github.proteu5.onyx`), as F-Droid requires an ID the publisher owns. Android treats it as a new app: install it fresh, then pair contacts again. The old app can be uninstalled afterwards.
 - **Added:** release signing with a dedicated key (developer builds; F-Droid builds without it), R8 shrinking, per-ABI version codes (`10 × base + 1/2/3` for armeabi-v7a / arm64-v8a / x86_64, universal `10 × base`), `-PonyxAbi=` to build a single ABI.
 - **Added:** reproducible-build settings (no VCS info file, no ART baseline profile) so F-Droid can publish the developer-signed APKs.
 - **Changed:** dependencies only from Google Maven and Maven Central (Guardian Project repo removed).
 - **Added:** F-Droid recipe (`fdroid/io.github.sirrogersjackblood.onyx.yml`), store screenshots and changelogs in `fastlane/`.
-- **Changed:** versionName `1.3.0`, base versionCode 8.
+- **Changed:** release APKs are about 40 MB instead of 230 MB: native libraries stripped (NDK 30.0.16248370, pinned), and libsignal's test library and desktop (macOS/Windows) libraries no longer packaged.
+- **Changed:** versionName `1.3.0`, base versionCode 8 (APKs 80–83).
+- **Tests:** emulator lab 65/65 on the release build (Android 11, 13, 14, 15, 16).
+- Change record: [`v1.3/CHANGE-RECORD.md`](v1.3/CHANGE-RECORD.md).
 
 ## v1.2.4 (pre-release, debug)
 _Reliability release. Three bugs found by the new emulator lab, all fixed and re-tested: 65/65 checks on Android 11, 13, 14, 15 and 16._
