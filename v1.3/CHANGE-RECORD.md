@@ -7,7 +7,7 @@
 | **Date** | 2026-10-18 |
 | **Requested by** | SirRogersJackBlood |
 | **Previous release** | v1.2.4 (CR-ONYX-2026-005) |
-| **Status** | Code complete and lab-tested: awaiting final build, publish and F-Droid merge request |
+| **Status** | Corrected per-ABI APKs published; F-Droid build/reproducibility and APK-scanning CI passed; upstream merge tracked in !53119 |
 
 ## Rationale
 F-Droid requires an application ID the publisher owns, free dependencies from trusted repositories, and a source build it can reproduce. A dedicated release key replaces the development key, so F-Droid can publish the developer-signed APKs.
@@ -33,7 +33,7 @@ Android installs v1.3.0 as a **new app** next to the old one. Users pair their c
 - [x] Rebuild without desktop libraries: no stray native files in the APK; arm64 APK 41.7 MB
 - [ ] Real devices: fresh install on Redmi Note 8 and Galaxy S25 Edge, pairing works
 - [x] Staged hashes match (4/4); PGP Good signatures on `SHA256SUMS.txt` and all four APKs; all APKs signed with `dc2130…2e9e`; version codes 80–83
-- [ ] F-Droid CI build on the merge request passes
+- [x] F-Droid CI build on the merge request passes: [pipeline #2960451922](https://gitlab.com/null-premise-group/fdroiddata/-/pipelines/2960451922), including three per-ABI reproducibility checks and APK scanning
 
 ## Release steps
 `.\gradlew :app:assembleRelease` → `.\scripts\stage-release.ps1 -Version 1.3.0 -Release -Sign` → verify → commit, push, tag `v1.3.0` → GitHub pre-release → F-Droid merge request.
@@ -43,3 +43,10 @@ Keep using v1.2.4 (different app ID, so both can be installed). For F-Droid: clo
 
 ## Key custody
 Release keystore and PGP secret key backed up offline (USB). Loss of the release keystore means no further updates for installs signed with it.
+
+
+## F-Droid follow-up evidence (2026-10-18)
+
+The earlier four-APK staging/PGP and emulator-lab entries above describe the original staging run. The corrected public release set contains version codes 81, 82, and 83 only; its exact source is `057ea6f6c220e0d03c5fd96ebc68f30a165c5ac5`. Current checksums and the seven-permission explanation are in [RELEASE-NOTES.md](RELEASE-NOTES.md). No new detached PGP signatures or device-lab run are claimed for the corrected set.
+
+The source fixes restored Android resources and removed conflicting ABI filters. The external signing fix preserves ZIP alignment and disables legacy JAR/v1 metadata; F-Droid successfully copied and verified each corrected release signature. The application manifest's permission declarations were unchanged.

@@ -1,6 +1,16 @@
 # Changelog
 
 ## v1.3.0 (pre-release, release-signed)
+
+### F-Droid validation follow-up (2026-10-18)
+
+- **Documented:** all seven Android permissions, their code paths, prompts, optional features, denial behavior, and privacy boundaries. The follow-up does not add manifest permissions. See [full release notes](v1.3/RELEASE-NOTES.md#android-permissions-purpose-timing-and-user-control).
+- **Fixed:** tracked the Android resources required by clean builds; anchored the private `/Res/` ignore rule at the repository root; removed ABI filters conflicting with Gradle splits.
+- **Fixed:** release signing preserves ZIP alignment and omits legacy JAR/v1 signing metadata. Corrected APKs use source commit `057ea6f6c220e0d03c5fd96ebc68f30a165c5ac5`; the existing `v1.3.0` tag has not been moved.
+- **Verified:** F-Droid [pipeline #2960451922](https://gitlab.com/null-premise-group/fdroiddata/-/pipelines/2960451922) passed, including all three ABI builds, signature-copy reproducibility, and APK scanning. The [upstream MR](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/53119) tracks inclusion.
+- **Updated:** release download list, current SHA-256 checksums, and signing-certificate instructions. Earlier alignment variants and v1.2.4 files remain historical assets; their old PGP/checksum files do not cover the corrected APKs.
+
+### Original v1.3.0 changes
 _First release-signed build, and the version submitted to F-Droid._
 - **Changed (breaking):** application ID is now `io.github.sirrogersjackblood.onyx` (was `io.github.proteu5.onyx`), as F-Droid requires an ID the publisher owns. Android treats it as a new app: install it fresh, then pair contacts again. The old app can be uninstalled afterwards.
 - **Added:** release signing with a dedicated key (developer builds; F-Droid builds without it), R8 shrinking, per-ABI version codes (`10 × base + 1/2/3` for armeabi-v7a / arm64-v8a / x86_64, universal `10 × base`), `-PonyxAbi=` to build a single ABI.
