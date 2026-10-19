@@ -50,7 +50,61 @@ data class Contact(
     }
 }
 
-class ContactRepo(private val store: SecureStore) {
+/**
+ * Per-contact list state for the contact list (v1.4.0). Kept apart from [Contact] so Contact's stored
+ * format is unchanged. Local only, inside the encrypted store; never sent.
+ *  - lastOrd: store order counter of the latest message (sorting by "recent" without timestamps)
+ *  - unread: incoming messages not yet seen in the chat screen
+ *  - archived: hidden from the main list until a new message arrives
+ *  - blocked: incoming messages are dropped silently, sending is refused
+ */
+data class ContactMeta(
+    val lastOrd: Long = 0,
+    val unread: Int = 0,
+    val archived: Boolean = false,
+    val blocked: Boolean = false,
+) {
+    fun encode(): ByteArray = ByteWriter(32).u8(1).u64(lastOrd).u32(unread.toLong())
+        .u8(if (archived) 1 else 0).u8(if (blocked) 1 else 0).toByteArray()
+
+    companion object {
+        fun decode(b: ByteArray): ContactMeta {
+            val r = ByteReader(b); require(r.u8() == 1)
+            return ContactMeta(r.u64(), r.u32().toInt(), r.u8() == 1, r.u8() == 1)
+        }
+    }
+}
+
+class ContactMetaRepo(private val store: SecureStore) {
+    private val listeners = mutableListOf<() -> Unit>()
+    fun addListener(l: () -> Unit) = synchronized(listeners) { listeners += l }
+    fun removeListener(l: () -> Unit) = synchronized(listeners) { listeners -= l }
+    private fun changed() = synchronized(listeners) { listeners.toList() }.forEach { it() }
+
+    fun get(id: String): ContactMeta =
+        store.get(NS, id)?.let { runCatching { ContactMeta.decode(it) }.getOrNull() } ?: ContactMeta()
+
+    @Synchronized
+    fun update(id: String, f: (ContactMeta) -> ContactMeta) {
+        val old = get(id); val new = f(old)
+        if (new != old) { store.upsertKeepOrder(NS, id, new.encode()); changed() }
+    }
+
+    /** A new message: bump recency; incoming ones count as unread and bring an archived chat back. */
+    fun onMessage(contactId: String, ord: Long, incoming: Boolean) = update(contactId) {
+        it.copy(lastOrd = ord, unread = if (incoming) it.unread + 1 else it.unread, archived = if (incoming) false else it.archived)
+    }
+
+    fun markRead(id: String) = update(id) { it.copy(unread = 0) }
+    fun setArchived(id: String, v: Boolean) = update(id) { it.copy(archived = v) }
+    fun setBlocked(id: String, v: Boolean) = update(id) { it.copy(blocked = v) }
+    fun isBlocked(id: String): Boolean = get(id).blocked
+    fun delete(id: String) { store.delete(NS, id); changed() }
+
+    companion object { private const val NS = "contact-meta" }
+}
+
+class ContactRepo(private val store: SecureStore, private val meta: ContactMetaRepo? = null) {
     private val listeners = mutableListOf<() -> Unit>()
     fun addListener(l: () -> Unit) = synchronized(listeners) { listeners += l }
     fun removeListener(l: () -> Unit) = synchronized(listeners) { listeners -= l }
@@ -60,7 +114,7 @@ class ContactRepo(private val store: SecureStore) {
     fun get(id: String): Contact? = store.get(NS, id)?.let { Contact.decode(it) }
     fun byOnion(onion: OnionAddress): Contact? = all().firstOrNull { it.onion == onion }
     fun save(c: Contact) { store.upsertKeepOrder(NS, c.id, c.encode()); changed() }
-    fun delete(id: String) { store.delete(NS, id); store.deleteNamespace(MessageRepo.ns(id)); changed() }
+    fun delete(id: String) { store.delete(NS, id); store.deleteNamespace(MessageRepo.ns(id)); meta?.delete(id); changed() }
 
     companion object { private const val NS = "contacts" }
 }
@@ -94,7 +148,7 @@ data class Message(
     }
 }
 
-class MessageRepo(private val store: SecureStore) {
+class MessageRepo(private val store: SecureStore, private val meta: ContactMetaRepo? = null) {
     private val listeners = mutableListOf<(String) -> Unit>()
     fun addListener(l: (String) -> Unit) = synchronized(listeners) { listeners += l }
     fun removeListener(l: (String) -> Unit) = synchronized(listeners) { listeners -= l }
@@ -102,7 +156,12 @@ class MessageRepo(private val store: SecureStore) {
 
     fun forContact(contactId: String): List<Message> = store.list(ns(contactId)).map { Message.decode(it.second) }
 
-    fun add(m: Message) { store.put(ns(m.contactId), m.id, m.encode(), store.nextOrd()); changed(m.contactId) }
+    fun add(m: Message) {
+        val ord = store.nextOrd()
+        store.put(ns(m.contactId), m.id, m.encode(), ord)
+        meta?.onMessage(m.contactId, ord, incoming = !m.outgoing)
+        changed(m.contactId)
+    }
 
     fun update(m: Message) { store.upsertKeepOrder(ns(m.contactId), m.id, m.encode()); changed(m.contactId) }
 

@@ -74,7 +74,14 @@ function Adb([string[]]$adbArgs) {
     (& $adb @adbArgs 2>&1 | ForEach-Object { "$_" } | Out-String).Trim()
 }
 function Alive([string]$serial) { (Sh $serial "pidof $Package") -match '^\d' }
-function Launch([string]$serial) { Sh $serial "monkey -p $Package -c android.intent.category.LAUNCHER 1" | Out-Null }
+# Launch and make sure the process actually started: right after a fresh install the launcher
+# entry can lag, so a single monkey tap is sometimes ignored. Retry up to 3 times.
+function Launch([string]$serial) {
+    for ($try = 1; $try -le 3; $try++) {
+        Sh $serial "monkey -p $Package -c android.intent.category.LAUNCHER 1" | Out-Null
+        for ($i = 0; $i -lt 10; $i++) { Start-Sleep 1; if (Alive $serial) { return } }
+    }
+}
 function Crashed([string]$serial) { (Sh $serial 'logcat -b crash -d') -match [regex]::Escape($Package) }
 function Add([string]$avd, [string]$check, [string]$result, [string]$detail = '') {
     $results.Add([pscustomobject]@{ Avd = $avd; Check = $check; Result = $result; Detail = $detail })
@@ -108,8 +115,14 @@ foreach ($a in $Lab) {
 
         Sh $serial 'logcat -c' | Out-Null; Sh $serial 'logcat -b crash -c' | Out-Null
         $inst = Adb @('-s', $serial, 'install', '-r', '-g', $Apk)
+        if ($inst -match 'INSTALL_FAILED_UPDATE_INCOMPATIBLE') {
+            # A build signed with a different key (debug vs release) is already installed: start clean.
+            Adb @('-s', $serial, 'uninstall', $Package) | Out-Null
+            $inst = Adb @('-s', $serial, 'install', '-g', $Apk)
+            if ($inst -match 'Success') { Add $a.Name 'install' 'PASS' 'clean install (previous build had another signing key)' }
+        }
+        elseif ($inst -match 'Success') { Add $a.Name 'install' 'PASS' }
         if ($inst -notmatch 'Success') { Add $a.Name 'install' 'FAIL' $inst; continue }
-        Add $a.Name 'install' 'PASS'
 
         Sh $serial "settings put system font_scale $($a.FontScale)" | Out-Null
         Launch $serial

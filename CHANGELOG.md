@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.4.0 (in development)
+- **Added:** contact list for 5+ contacts: search by name (on the phone only), sort by most recent conversation or A–Z, unread counts, "online" dot (a frame exchanged in the last 5 minutes; kept in memory only).
+- **Added:** long-press a contact to rename, archive or block. Archived chats return when a new message arrives. Blocked contacts' messages are dropped silently (still acknowledged, so they learn nothing) and sending to them is refused.
+- **Storage:** list state (recency counter, unread, archived, blocked) lives in a new encrypted `contact-meta` namespace; the stored contact format is unchanged.
+
 ## v1.3.0 (pre-release, release-signed)
 
 ### F-Droid validation follow-up (2026-10-18)

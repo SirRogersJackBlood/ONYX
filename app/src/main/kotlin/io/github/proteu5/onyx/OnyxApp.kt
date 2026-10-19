@@ -8,6 +8,7 @@ import android.app.NotificationManager
 import android.os.Bundle
 import io.github.proteu5.onyx.core.ByteReader
 import io.github.proteu5.onyx.core.ByteWriter
+import io.github.proteu5.onyx.data.ContactMetaRepo
 import io.github.proteu5.onyx.data.ContactRepo
 import io.github.proteu5.onyx.data.InviteRepo
 import io.github.proteu5.onyx.data.MessageRepo
@@ -27,8 +28,9 @@ class OnyxApp : Application() {
 
     lateinit var vault: KeyVault; private set
     val store by lazy { SecureStore(this, vault) }
-    val contacts by lazy { ContactRepo(store) }
-    val messages by lazy { MessageRepo(store) }
+    val contactMeta by lazy { ContactMetaRepo(store) }
+    val contacts by lazy { ContactRepo(store, contactMeta) }
+    val messages by lazy { MessageRepo(store, contactMeta) }
     val outbox by lazy { OutboxRepo(store) }
     val crypto by lazy { CryptoEngine(OnyxSignalStore(store)) }
     val tor by lazy { TorController(this, store) }
@@ -36,7 +38,9 @@ class OnyxApp : Application() {
     val messenger by lazy {
         Messenger(crypto, tor, contacts, messages, outbox, InviteRepo(store),
             badgeProvider = { snowflake.badge() },
-            notifyIncoming = { OnyxService.notifyNewMessage(this) })
+            notifyIncoming = { OnyxService.notifyNewMessage(this) }).apply {
+            isBlocked = { id -> contactMeta.isBlocked(id) }
+        }
     }
 
     // ---- app lock ----

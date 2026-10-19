@@ -152,6 +152,16 @@ class Messenger(
     // ------------------------------------------------------------------ sending
 
     class RateLimited : Exception("Slow down: at most 20 messages a minute.")
+    class Blocked : Exception("You blocked this contact. Unblock them to send.")
+
+    /** Set by OnyxApp: contacts the user blocked (incoming dropped silently, sending refused). */
+    @Volatile var isBlocked: (String) -> Boolean = { false }
+
+    /** Last time a frame was exchanged with each contact, in memory only (never stored): drives "online now". */
+    private val lastSeen = java.util.concurrent.ConcurrentHashMap<String, Long>()
+    fun lastSeenMs(contactId: String): Long = lastSeen[contactId] ?: 0L
+    fun isOnline(contactId: String, nowMs: Long = System.currentTimeMillis()): Boolean =
+        nowMs - lastSeenMs(contactId) < ONLINE_WINDOW_MS
 
     // Send times per contact, memory only: enough to stop scripted bulk sending.
     private val sendTimes = ConcurrentHashMap<String, MutableList<Long>>()
@@ -161,6 +171,7 @@ class Messenger(
      * (80 chars max, one line, no code-shaped symbols) and rate-limited. Returns what was actually sent.
      */
     fun sendText(contact: Contact, raw: String): String {
+        if (isBlocked(contact.id)) throw Blocked()
         val text = MessagePolicy.sanitize(raw)
         require(text.isNotEmpty()) { "Nothing left to send after removing unsupported characters." }
         val now = System.currentTimeMillis()
@@ -212,6 +223,7 @@ class Messenger(
                     for (item in items) {
                         link.deliver(Frame.Message(item.signalType, item.ciphertext))
                         outbox.remove(item.messageId)
+                        lastSeen[contact.id] = System.currentTimeMillis()
                         markSent(contact, item.messageId, Transport.TOR_DIRECT)
                     }
                 }
@@ -236,6 +248,8 @@ class Messenger(
 
     /** Returns true when the message is safely stored (→ ACK). */
     private fun handleIncoming(contact: Contact, f: Frame.Message): Boolean {
+        // Blocked: drop silently, but ACK so the sender stops retrying and learns nothing.
+        if (isBlocked(contact.id)) return true
         val env = try {
             crypto.decrypt(contact, f.signalType, f.ciphertext)
         } catch (e: DuplicateMessageException) {
@@ -244,6 +258,7 @@ class Messenger(
             return false
         }
         val fresh = contacts.get(contact.id) ?: return false
+        lastSeen[fresh.id] = System.currentTimeMillis()
         when (env.kind) {
             Envelope.Kind.TEXT -> {
                 val expires = if (fresh.disappearSeconds > 0) System.currentTimeMillis() + fresh.disappearSeconds * 1000L else 0L
@@ -268,3 +283,5 @@ class Messenger(
         return true
     }
 }
+
+private const val ONLINE_WINDOW_MS = 5 * 60_000L

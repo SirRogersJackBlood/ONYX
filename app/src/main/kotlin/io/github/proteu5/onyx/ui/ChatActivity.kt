@@ -172,6 +172,7 @@ class ChatActivity : OnyxActivity() {
 
     private fun render() {
         val c = contact() ?: return
+        runCatching { app.contactMeta.markRead(c.id) }   // the chat is on screen: nothing here is unread
         threadView.removeAllViews()
         val msgs = app.messages.forContact(c.id)
         if (!c.verified) {
@@ -225,6 +226,7 @@ class ChatActivity : OnyxActivity() {
                 .onSuccess { sent -> if (sent != t) runOnUiThread { toast("Code-like symbols were removed before sending.") } }
                 .onFailure { e -> runOnUiThread {
                     if (e is io.github.proteu5.onyx.net.Messenger.RateLimited) { input.setText(t); toast(e.message ?: "Slow down") }
+                    else if (e is io.github.proteu5.onyx.net.Messenger.Blocked) { input.setText(t); toast(e.message ?: "Blocked") }
                     else toast("Could not queue message")
                 } }
         }
