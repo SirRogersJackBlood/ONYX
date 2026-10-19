@@ -1,8 +1,42 @@
 # Changelog
 
+## v1.5.0 (in development)
+- **Added (core only):** opt-in handles design ([docs/HANDLES.md](docs/HANDLES.md)): Argon2id + BLAKE2b (checked against RFC 9106 vectors), sealed same-size records, per-record owner keys, the shared host rule with write proof of work and delete tombstones, request proof of work. No network or UI yet; a second security review comes before that.
+
+## v1.4.4 (in development)
+- **Added:** images.
+  - Picked with the system photo picker; no storage permission needed.
+  - Every untrusted image (picked or received) is decoded only in a fresh, isolated, permission-less process created for that image alone. It returns raw pixels, and ONYX encodes its own JPEG. Received images are checked (sender, group, 10 a minute) before any decoding, and decoded off the network thread.
+  - Re-encoded on the sending phone to at most 800 px and 58 KB, which drops EXIF, GPS, camera model, timestamps, thumbnails and trailing data. The receiving phone re-encodes again and checks the size before decoding.
+  - Every image is padded to exactly 60 KiB, which travels as a 64 KiB frame (measured on two phones over Tor: ~0.8 s on Wi-Fi), at most 5 a minute.
+  - Images stay inside ONYX: no save-to-gallery button, and screenshots stay blocked.
+  - Works in 1:1 chats and groups. New envelope kind `IMAGE` (11).
+- **Changed:** messages up to 500 characters (was 80), still on one line with the same filtering. Every text message is padded to 4 KiB, so "ok" and 500 characters look identical.
+- **Added:** links.
+  - http(s) to an ASCII host name only, at most 3 per message.
+  - Tracking parameters (utm_*, fbclid, gclid…) are removed.
+  - Disguised links (`real.com@evil.example`) and look-alike letters are not treated as links.
+  - Never previewed or fetched. Tapping one shows "You are leaving ONYX" with the full host, plus Open / Copy link (for Tor Browser) / Stay.
+- **Added:** accessibility warning.
+  - When any accessibility app is on, the home screen lists it and explains that it can read the screen (decrypted messages included) and act for you. "Review" opens Android's accessibility settings; "I trust these" hides the warning until the set of apps changes. Settings → Security shows the same list.
+  - On Android 14+, every ONYX screen is marked accessibility-data-sensitive, so only declared accessibility tools (screen readers like TalkBack) can read it.
+- **Changed:** delivery to up to 4 contacts in parallel. An offline contact no longer delays everyone else; group invites had been taking 7–15 minutes behind offline contacts.
+- **Added:** warm links. A contact's connection stays open for 45 s after a message, so replies skip Tor's 2–3 s connection setup (measured: 0.7 s instead of 2.2 s).
+- **Changed:** this version also accepts v1.5's leaner wire sizes (each plaintext size plus 2 KiB), so v1.5 can switch sending without breaking anyone. Measured today: ~1 KB of encryption overhead pushes every frame into a 4× larger size.
+- **Added (developer):** Settings → Developer → transit benchmark. It measures real delivery time over Tor for 16 KiB, 64 KiB and 256 KiB padding-only frames between two paired phones, plus Android's own battery and data readings. It's off by default; the receiving side must turn on "Accept benchmark", which lasts only until restart. Nothing is stored. New frame type `BENCH` (0x30).
+- **Changed:** the mailbox keeps a small index and caps storage at 300 MB in total and 30 MB per sender, and never loads every item into memory.
+
+## v1.4.1 (in development)
+- **Added:** private groups of up to 8 people, with no admin and no server ([docs/GROUPS.md](docs/GROUPS.md)). The group id commits to its creator, name and verified-only setting; every member needs a signed voucher from whoever invited them; an onion claimed with two keys is marked disputed and excluded. Any member can invite their own contacts, and invites wait until you join or decline. Your join and leave are signed with your own identity key, so nobody can add you, remove you, or fake that you left. Every message is encrypted separately to each member over the existing 1:1 sessions.
+- **Added:** automatic introductions between members who haven't paired. The one-time code works only for the intended member, is relayed through members who are already paired, and the new contact starts UNVERIFIED. Verified-only groups turn introductions off.
+- **Added:** envelope kinds `GROUP_INVITE` (7), `GROUP_STATE` (8), `GROUP_TEXT` (9) and `GROUP_INTRO` (10). The stored message format gains a sender field (v2; v1 messages still read).
+
 ## v1.4.0 (in development)
 - **Added:** contact list for 5+ contacts: search by name (on the phone only), sort by most recent conversation or A–Z, unread counts, "online" dot (a frame exchanged in the last 5 minutes; kept in memory only).
 - **Added:** long-press a contact to rename, archive or block. Archived chats return when a new message arrives. Blocked contacts' messages are dropped silently (still acknowledged, so they learn nothing) and sending to them is refused.
+- **Added:** **mailbox** ([docs/MAILBOX.md](docs/MAILBOX.md)): a spare phone you own, in mailbox mode, holds encrypted messages while your main phone is offline. Senders fall back to it when direct delivery fails; the owner collects every minute. It sees only an opaque per-sender tag, time and size; items are deleted when collected or after 14 days. New frames `FETCH`, `MAILBOX_ITEM`, `MAILBOX_DONE`, `MAILBOX_KEYS` and envelope kind `MAILBOX` (6).
+- **Changed:** background notices (badge, timer, mailbox) stop retrying after about 2 days; your messages still never give up.
+- **Changed:** compact home header: smaller emblem beside the connection status, so conversations start higher on the screen.
 - **Storage:** list state (recency counter, unread, archived, blocked) lives in a new encrypted `contact-meta` namespace; the stored contact format is unchanged.
 
 ## v1.3.0 (pre-release, release-signed)

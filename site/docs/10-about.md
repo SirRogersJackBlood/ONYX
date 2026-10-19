@@ -28,9 +28,9 @@ ONYX turns that idea around. It uses the same kind of low-level, out-of-sight ma
 
 ONYX is for people, not programs. These rules keep it from being turned into the kind of hidden command channel it was born from watching:
 
-- **Short and plain.** 80 characters, one line: letters, numbers, emoji and basic punctuation.
+- **Plain.** Up to 500 characters on one line: letters, numbers, emoji, basic punctuation and cleaned-up links (tracking removed, never previewed, a "You are leaving ONYX" notice before anything opens).
 - **No code.** Brackets, backticks, dollar signs, semicolons, pipes and similar symbols are removed, as are repeated symbols and invisible characters. Injection-style text arrives harmless.
-- **No attachments,** now or planned.
+- **Images only, stripped.** No files, voice or video. Images are re-encoded on both phones so no location, camera or date data survives, and every image is the same size on the wire.
 - **Rate-limited,** with no API for other apps or scripts to send messages.
 
 These rules are enforced both when sending and when receiving. See [Threat model](threat-model#abuse-resistance).

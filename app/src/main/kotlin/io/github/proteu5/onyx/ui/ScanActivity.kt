@@ -49,7 +49,8 @@ class ScanActivity : OnyxActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        screen("SCAN", "POINT AT THEIR ONYX CODE") {
+        val forMailbox = intent.getBooleanExtra(EXTRA_MAILBOX, false)
+        screen("SCAN", if (forMailbox) "POINT AT YOUR MAILBOX PHONE'S CODE" else "POINT AT THEIR ONYX CODE") {
             preview = TextureView(this@ScanActivity)
             add(card().apply { addView(preview, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(360))) }, 12)
             status = text("Looking for a code…", 12f, Forge.CYAN, mono = true)
@@ -175,6 +176,11 @@ class ScanActivity : OnyxActivity() {
             val result = runCatching { app.messenger.pairWith(code.trim()) }
             runOnUiThread {
                 result.onSuccess { c ->
+                    if (intent.getBooleanExtra(EXTRA_MAILBOX, false)) {
+                        runCatching { app.messenger.setMyMailbox(c) }
+                        android.widget.Toast.makeText(this, "Mailbox paired. Your contacts will be told where to leave messages.", android.widget.Toast.LENGTH_LONG).show()
+                        finish(); return@onSuccess
+                    }
                     startActivity(Intent(this, ChatActivity::class.java).putExtra(ChatActivity.EXTRA_ID, c.id)); finish()
                 }.onFailure { e ->
                     status.text = "Pairing failed: ${e.message ?: "unknown error"}"
@@ -192,5 +198,9 @@ class ScanActivity : OnyxActivity() {
         bgThread?.quitSafely(); bgThread = null
     }
 
-    companion object { private const val REQ_CAMERA = 7 }
+    companion object {
+        private const val REQ_CAMERA = 7
+        /** Set by Settings → "Pair my mailbox": the scanned phone becomes this phone's mailbox. */
+        const val EXTRA_MAILBOX = "onyx.mailbox"
+    }
 }

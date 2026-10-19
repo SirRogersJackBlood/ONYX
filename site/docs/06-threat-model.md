@@ -63,11 +63,12 @@ ONYX is built for people, not programs, and is deliberately hard to turn into a 
 
 | Control | What it does |
 |---|---|
-| **80-character, one-line messages** | Enforced when sending *and* again when receiving, so a modified client gains nothing |
+| **500-character, one-line messages** | Enforced when sending *and* again when receiving, so a modified client gains nothing |
 | **Symbol filter** | Only letters, digits, emoji and basic punctuation (. , ! ? ' " - : and parentheses) survive. Angle, curly and square brackets, backticks, dollar, backslash, pipe, semicolon, equals, hash, percent, ampersand, asterisk, underscore, at, slash, caret, tilde and plus are removed, so injection-style payloads (PHP, SQL, shell, template, jndi) arrive inert |
 | **No consecutive symbols** | `!!!` → `!`, `--` → `-`, `?>` → `?` |
 | **Invisible and look-alike characters stripped** | Zero-width characters and bidi overrides are removed; fullwidth look-alikes are normalized (NFKC) and then filtered |
-| **No attachments** | The only message kinds are text, badge, receipt, pairing and timer; anything else is rejected |
+| **Images only, re-encoded** | No files, voice or video. Images are decoded to pixels and re-encoded on the sender's AND the receiver's phone (no EXIF/GPS/camera data), size-checked before decoding, max 5 a minute, padded to one size. Unknown message kinds are rejected |
+| **Accessibility apps** | They can read any screen. ONYX lists the ones that are on and warns until you confirm you trust them; on Android 14+ its screens are hidden from accessibility apps that aren't declared accessibility tools |
 | **Rate limit** | At most 20 messages per minute per contact, at least 0.7 s apart |
 | **No automation surface** | No exported API, intents, broadcast or service that can send a message. The only exported screen pre-fills an invite code and still needs a human tap |
 

@@ -113,6 +113,39 @@ class SettingsActivity : OnyxActivity() {
             }, 8)
             add(share, 8)
 
+            // ---------------- Mailbox ----------------
+            add(text("MAILBOX", 11f, Forge.MUTED, mono = true).apply { letterSpacing = 0.2f }, 24)
+            val mbox = card()
+            val myBox = app.messenger.myMailbox()
+            when {
+                app.mailboxMode -> {
+                    mbox.add(text("This phone is a mailbox", 17f, Forge.TEXT))
+                    mbox.add(text("It holds encrypted messages for its owner and nothing else. ${app.mailboxStore.count()} waiting.", 13f, Forge.MUTED), 6)
+                    mbox.add(button("Stop being a mailbox", primary = false) { confirmMailboxOff() }, 10)
+                }
+                myBox != null -> {
+                    mbox.add(text("Your mailbox: ${myBox.name}", 17f, Forge.TEXT))
+                    mbox.add(text("When your phone is offline, contacts leave encrypted messages there and you collect them " +
+                        "every minute once you're back. It can't read them.", 13f, Forge.MUTED), 6)
+                    mbox.add(button("Remove my mailbox", primary = false) {
+                        app.messenger.removeMyMailbox(); android.widget.Toast.makeText(this@SettingsActivity, "Mailbox removed", android.widget.Toast.LENGTH_SHORT).show(); build()
+                    }, 10)
+                }
+                else -> {
+                    mbox.add(text("Get messages while you're offline", 17f, Forge.TEXT))
+                    mbox.add(text("Turn a spare phone into your own mailbox: it stays online and holds encrypted messages " +
+                        "until you collect them. No server, nobody else's phone. See docs/MAILBOX.md.", 13f, Forge.MUTED), 6)
+                    mbox.add(button("Pair my mailbox", primary = false) {
+                        startActivity(Intent(this@SettingsActivity, ScanActivity::class.java).putExtra(ScanActivity.EXTRA_MAILBOX, true))
+                    }, 10)
+                    if (app.contacts.all().isEmpty()) {
+                        mbox.add(button("Use THIS phone as a mailbox", primary = false) { confirmMailboxOn() }, 8)
+                        mbox.add(text("Only on a phone with no contacts. It will pair with one owner and refuse everyone else.", 11f, Forge.MUTED), 4)
+                    }
+                }
+            }
+            add(mbox, 8)
+
             // ---------------- Network ----------------
             add(text("NETWORK", 11f, Forge.MUTED, mono = true).apply { letterSpacing = 0.2f }, 24)
             val net = card()
@@ -140,10 +173,30 @@ class SettingsActivity : OnyxActivity() {
                 sec.add(text("Key not tied to the screen lock: Android 12-14 would erase it if the lock were ever " +
                     "removed. It stays in the phone's secure hardware.", 11f, Forge.MUTED), 6)
             }
+            val a11y = AccessibilityCheck.enabled(this@SettingsActivity)
+            if (a11y.isNotEmpty()) {
+                sec.add(text("ACCESSIBILITY APPS ON: " + a11y.joinToString(", ") { it.label }, 11f, Forge.WARN, mono = true), 10)
+                sec.add(text(if (AccessibilityCheck.sensitiveScreensSupported) "ONYX screens are hidden from those that aren't accessibility tools."
+                    else "They can read ONYX's screen on this Android version.", 11f, Forge.MUTED), 4)
+                sec.add(button("Review accessibility apps", primary = false) {
+                    runCatching { startActivity(Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+                }, 6)
+            } else sec.add(text("No accessibility apps are on.", 11f, Forge.MUTED), 10)
             sec.add(text("Protocol: PQXDH (X25519 + ML-KEM-1024) · Triple Ratchet (Double Ratchet + SPQR/ML-KEM-768) · libsignal", 11f, Forge.MUTED, mono = true), 6)
             sec.add(switch("App lock (biometric / device PIN)", app.appLockEnabled) { v -> app.appLockEnabled = v; app.unlocked = true }, 10)
             sec.add(button("Panic wipe", primary = false) { confirmWipe() }, 12)
             add(sec, 8)
+
+            // ---------------- Developer ----------------
+            add(text("DEVELOPER", 11f, Forge.MUTED, mono = true).apply { letterSpacing = 0.2f }, 24)
+            val dev = card()
+            dev.add(text("Transit benchmark: measures real delivery time over Tor with padding-only test frames. " +
+                "Nothing is stored or shown to the other person; only paired contacts can take part.", 12f, Forge.MUTED))
+            dev.add(switch("Accept benchmark from contacts (turns itself off after 1 hour)", app.messenger.server.acceptBench) { v ->
+                app.messenger.server.acceptBench = v
+            }, 8)
+            dev.add(button("Run transit benchmark", primary = false) { chooseBenchContact() }, 8)
+            add(dev, 8)
 
             add(button("About ONYX", primary = false) { startActivity(Intent(this@SettingsActivity, AboutActivity::class.java)) }, 24)
         }
@@ -162,6 +215,91 @@ class SettingsActivity : OnyxActivity() {
             .setPositiveButton("Turn on") { _, _ -> onYes() }
             .setNegativeButton("Cancel") { _, _ -> build() }
             .show()
+    }
+
+    private fun confirmMailboxOn() {
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Make this phone a mailbox?")
+            .setMessage("This phone will only hold encrypted messages for one owner: the first phone that pairs with it.\n\n" +
+                "• It can't read anything it holds.\n• It learns an opaque tag per sender and when messages arrive, never names.\n" +
+                "• Messages are deleted when collected, or after 14 days.\n• It can't chat or pair with anyone else.")
+            .setPositiveButton("Make mailbox") { _, _ ->
+                runCatching { app.mailboxMode = true }.onFailure {
+                    android.widget.Toast.makeText(this, it.message ?: "Not possible", android.widget.Toast.LENGTH_LONG).show()
+                }
+                build()
+            }
+            .setNegativeButton("Cancel", null).show()
+    }
+
+    private fun confirmMailboxOff() {
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Stop being a mailbox?")
+            .setMessage("Deletes every message waiting here (${app.mailboxStore.count()}) and forgets the owner. The owner should remove this mailbox on their phone too.")
+            .setPositiveButton("Stop and delete") { _, _ ->
+                app.contacts.all().forEach { c -> app.outbox.removeForContact(c.id); app.crypto.forget(c); app.contacts.delete(c.id) }
+                app.mailboxMode = false
+                build()
+            }
+            .setNegativeButton("Cancel", null).show()
+    }
+
+    private fun chooseBenchContact() {
+        val list = app.contacts.all().filter { app.crypto.hasSession(it) }
+        if (list.isEmpty()) { android.widget.Toast.makeText(this, "Pair with a second device first.", android.widget.Toast.LENGTH_LONG).show(); return }
+        val rounds = intArrayOf(10, 20, 50)
+        AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Benchmark which contact?")
+            .setItems(list.map { it.name }.toTypedArray()) { _, i ->
+                AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                    .setTitle("Rounds per test")
+                    .setItems(rounds.map { "$it (about ${it * 30 / 60 + 1} min)" }.toTypedArray()) { _, r -> runBench(list[i], rounds[r]) }
+                    .show()
+            }.show()
+    }
+
+    /** Runs the benchmark with real battery (charge counter) and data (this app's bytes) readings around it. */
+    private fun runBench(c: io.github.proteu5.onyx.data.Contact, rounds: Int) {
+        val status = text("Starting…", 12f, Forge.CYAN, mono = true).apply { setPadding(dp(20), dp(12), dp(20), dp(12)) }
+        val stop = java.util.concurrent.atomic.AtomicBoolean(false)
+        val dlg = AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+            .setTitle("Transit benchmark").setView(status).setCancelable(false)
+            .setNegativeButton("Stop", null).show()
+        // Keep the dialog open after Stop: it closes by itself with the partial report.
+        dlg.getButton(android.app.AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+            stop.set(true); status.text = "Stopping after the current send (can take up to a minute over Tor)…"
+        }
+        window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        thread {
+            val bm = getSystemService(android.os.BatteryManager::class.java)
+            val uid = android.os.Process.myUid()
+            val charge0 = bm.getLongProperty(android.os.BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
+            val rx0 = android.net.TrafficStats.getUidRxBytes(uid); val tx0 = android.net.TrafficStats.getUidTxBytes(uid)
+            val t0 = System.currentTimeMillis()
+            val report = runCatching { app.messenger.benchmark(c, rounds, { stop.get() }) { p -> runOnUiThread { if (!stop.get()) status.text = p } } }
+                .getOrElse { "Benchmark failed: ${it.message}" }
+            val mins = (System.currentTimeMillis() - t0) / 60_000.0
+            val charge1 = bm.getLongProperty(android.os.BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER)
+            val rx = android.net.TrafficStats.getUidRxBytes(uid) - rx0; val tx = android.net.TrafficStats.getUidTxBytes(uid) - tx0
+            val charging = bm.isCharging
+            val full = report + "\nduration_min|%.1f\n".format(java.util.Locale.US, mins) +
+                "data_sent_MB|%.2f\ndata_received_MB|%.2f\n".format(java.util.Locale.US, tx / 1e6, rx / 1e6) +
+                (if (charge0 > 0 && charge1 > 0) "battery_used_mAh|%.1f%s\n".format(java.util.Locale.US, (charge0 - charge1) / 1000.0,
+                    if (charging) " (CHARGING: unplug for a battery reading)" else "") else "battery_used_mAh|not reported by this phone\n") +
+                "device|${android.os.Build.MODEL} · Android ${android.os.Build.VERSION.RELEASE}\n"
+            runOnUiThread {
+                window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                dlg.dismiss()
+                AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+                    .setTitle("Benchmark result")
+                    .setMessage(full)
+                    .setPositiveButton("Copy") { _, _ ->
+                        getSystemService(android.content.ClipboardManager::class.java)
+                            ?.setPrimaryClip(android.content.ClipData.newPlainText("onyx benchmark", full))
+                    }
+                    .setNegativeButton("Close", null).show()
+            }
+        }
     }
 
     private fun confirmWipe() {

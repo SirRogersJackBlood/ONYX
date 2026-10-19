@@ -114,7 +114,9 @@ class ContactRepo(private val store: SecureStore, private val meta: ContactMetaR
     fun get(id: String): Contact? = store.get(NS, id)?.let { Contact.decode(it) }
     fun byOnion(onion: OnionAddress): Contact? = all().firstOrNull { it.onion == onion }
     fun save(c: Contact) { store.upsertKeepOrder(NS, c.id, c.encode()); changed() }
-    fun delete(id: String) { store.delete(NS, id); store.deleteNamespace(MessageRepo.ns(id)); meta?.delete(id); changed() }
+    fun delete(id: String) {
+        store.delete(NS, id); store.deleteNamespace(MessageRepo.ns(id)); store.deleteNamespace(MessageRepo.imgNs(id)); meta?.delete(id); changed()
+    }
 
     companion object { private const val NS = "contacts" }
 }
@@ -130,19 +132,25 @@ data class Message(
     val state: MsgState,
     val transport: Transport?,
     val expiresAtMs: Long,     // 0 = never
+    /** Group chats only (v1.4.1): the contact id of the member who wrote an incoming message. */
+    val senderId: String? = null,
+    /** v1.4.4: an image is attached (bytes kept separately, see [MessageRepo.image]); [text] is its caption. */
+    val hasImage: Boolean = false,
 ) {
-    fun encode(): ByteArray = ByteWriter(text.length * 3 + 64)
-        .u8(1).str16(id).str16(contactId).u8(if (outgoing) 1 else 0)
+    fun encode(): ByteArray = ByteWriter(text.length * 3 + 96)
+        .u8(3).str16(id).str16(contactId).u8(if (outgoing) 1 else 0)
         .bytes32(text.toByteArray(Charsets.UTF_8)).u64(sentAtMinute).u8(state.ordinal)
-        .u8(transport?.ordinal ?: 255).u64(expiresAtMs).toByteArray()
+        .u8(transport?.ordinal ?: 255).u64(expiresAtMs).str16(senderId ?: "").u8(if (hasImage) 1 else 0).toByteArray()
 
     companion object {
         fun decode(b: ByteArray): Message {
             val r = ByteReader(b)
-            require(r.u8() == 1)
+            val v = r.u8(); require(v in 1..3)
             return Message(
                 r.str16(), r.str16(), r.u8() == 1, String(r.bytes32(1 shl 20), Charsets.UTF_8), r.u64(),
-                MsgState.values()[r.u8()], r.u8().let { if (it == 255) null else Transport.values()[it] }, r.u64()
+                MsgState.values()[r.u8()], r.u8().let { if (it == 255) null else Transport.values()[it] }, r.u64(),
+                if (v >= 2) r.str16().ifEmpty { null } else null,
+                if (v >= 3) r.u8() == 1 else false,
             )
         }
     }
@@ -165,18 +173,25 @@ class MessageRepo(private val store: SecureStore, private val meta: ContactMetaR
 
     fun update(m: Message) { store.upsertKeepOrder(ns(m.contactId), m.id, m.encode()); changed(m.contactId) }
 
-    fun delete(contactId: String, id: String) { store.delete(ns(contactId), id); changed(contactId) }
+    fun delete(contactId: String, id: String) { store.delete(ns(contactId), id); store.delete(imgNs(contactId), id); changed(contactId) }
+
+    /** Image bytes (already re-encoded, no metadata), stored apart so listing a chat stays light. */
+    fun putImage(chatId: String, messageId: String, jpeg: ByteArray) = store.upsertKeepOrder(imgNs(chatId), messageId, jpeg)
+    fun image(chatId: String, messageId: String): ByteArray? = store.get(imgNs(chatId), messageId)
 
     /** Removes expired disappearing messages. Returns number removed. */
     fun sweepExpired(contacts: List<Contact>, nowMs: Long): Int {
         var n = 0
         for (c in contacts) for (m in forContact(c.id)) {
-            if (m.expiresAtMs in 1..nowMs) { store.delete(ns(c.id), m.id); n++ }
+            if (m.expiresAtMs in 1..nowMs) { store.delete(ns(c.id), m.id); store.delete(imgNs(c.id), m.id); n++ }
         }
         return n
     }
 
-    companion object { fun ns(contactId: String) = "msg:$contactId" }
+    companion object {
+        fun ns(contactId: String) = "msg:$contactId"
+        fun imgNs(chatId: String) = "img:$chatId"
+    }
 }
 
 /** Ciphertexts waiting for delivery. Encrypted ONCE; retries resend identical bytes. */
@@ -212,15 +227,22 @@ class OutboxRepo(private val store: SecureStore) {
  * in the encrypted store. In-person codes stay memory-only.
  */
 class InviteRepo(private val store: SecureStore) {
-    fun put(pairingIdHex: String, codeText: String, bundle: ByteArray) =
-        store.put(NS, pairingIdHex, ByteWriter(bundle.size + 256).u8(1).str16(codeText).bytes32(bundle).toByteArray(), store.nextOrd())
+    /** A stored invite. [expectOnion]/[expectIdentity]: set for group introductions, which only that member may use. */
+    class Stored(val codeText: String, val bundle: ByteArray, val expectOnion: ByteArray?, val expectIdentity: ByteArray?)
+
+    fun put(pairingIdHex: String, codeText: String, bundle: ByteArray, expectOnion: ByteArray? = null, expectIdentity: ByteArray? = null) {
+        val w = ByteWriter(bundle.size + 360).u8(2).str16(codeText).bytes32(bundle)
+        if (expectOnion != null && expectIdentity != null) w.u8(1).fixed(expectOnion, 32).bytes16(expectIdentity) else w.u8(0)
+        store.put(NS, pairingIdHex, w.toByteArray(), store.nextOrd())
+    }
 
     /** Single use: returns and deletes. */
-    fun take(pairingIdHex: String): Pair<String, ByteArray>? {
+    fun take(pairingIdHex: String): Stored? {
         val raw = store.get(NS, pairingIdHex) ?: return null
         store.delete(NS, pairingIdHex)
-        val r = ByteReader(raw); r.u8()
-        return r.str16() to r.bytes32(1 shl 16)
+        val r = ByteReader(raw); val v = r.u8()
+        val text = r.str16(); val bundle = r.bytes32(1 shl 16)
+        return if (v >= 2 && r.u8() == 1) Stored(text, bundle, r.raw(32), r.bytes16(64)) else Stored(text, bundle, null, null)
     }
 
     fun count(): Int = store.list(NS).size

@@ -40,6 +40,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.ChatActivity" android:exported="false" android:windowSoftInputMode="adjustResize" android:screenOrientation="portrait" />
+        <activity android:name=".ui.GroupActivity" android:exported="false" android:windowSoftInputMode="adjustResize" android:screenOrientation="portrait" />
         <activity android:name=".ui.PairActivity" android:exported="false" android:screenOrientation="portrait" />
         <!-- Exported ONLY to receive invite links. It pre-fills the code; pairing always needs a user tap. -->
         <activity
@@ -62,6 +63,12 @@
         <activity android:name=".ui.SettingsActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".ui.AboutActivity" android:exported="false" android:screenOrientation="portrait" />
 
+        <!-- v1.4.4: untrusted images are decoded only in this isolated, permission-less process. -->
+        <service
+            android:name=".media.ImageSandboxService"
+            android:exported="false"
+            android:isolatedProcess="true"
+            android:process=":imgsandbox" />
         <service
             android:name=".service.OnyxService"
             android:exported="false"

@@ -81,16 +81,18 @@ class ChatActivity : OnyxActivity() {
 
         val bar = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; setPadding(dp(12), dp(8), dp(12), dp(12)); gravity = Gravity.CENTER_VERTICAL }
         input = EditText(this).apply {
-            hint = "Message · 80 max"; setHintTextColor(Forge.MUTED); setTextColor(Forge.TEXT)
-            // One line, 80 characters: ONYX is for short human messages, not payloads or scripts.
+            hint = "Message · ${io.github.proteu5.onyx.core.MessagePolicy.MAX_CHARS} max"; setHintTextColor(Forge.MUTED); setTextColor(Forge.TEXT)
+            // One line, 500 characters: ONYX is for human messages, not payloads or scripts.
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             filters = arrayOf(android.text.InputFilter.LengthFilter(io.github.proteu5.onyx.core.MessagePolicy.MAX_CHARS))
             // Ask the keyboard not to learn from what is typed here (Gboard incognito etc.).
             imeOptions = imeOptions or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
-            maxLines = 3
+            maxLines = 6
             background = GradientDrawable().apply { cornerRadius = dp(10).toFloat(); setColor(Forge.SURFACE); setStroke(dp(1), Forge.LINE) }
             setPadding(dp(12), dp(10), dp(12), dp(10))
         }
+        bar.addView(button("Photo", primary = false) { pickImage() }, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { marginEnd = dp(8) })
         input.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) = Unit
             override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) = Unit
@@ -127,11 +129,11 @@ class ChatActivity : OnyxActivity() {
         val n = input.text.toString().toByteArray(Charsets.UTF_8).size
         if (n == 0) { draftLine.text = "type a message: its size on the wire updates live"; return }
         val envelope = n + 26                                   // version, kind, id, minute, length
-        val plainBucket = runCatching { Padding.bucketFor(envelope, Padding.MESSAGE_BUCKETS) }.getOrNull()
+        val plainBucket = runCatching { Padding.bucketFor(maxOf(envelope, io.github.proteu5.onyx.core.Envelope.TEXT_BUCKET - 1), Padding.MESSAGE_BUCKETS) }.getOrNull()
         if (plainBucket == null) { draftLine.text = "draft $n B · too large"; return }
         val frame = runCatching { Padding.bucketFor(plainBucket + 160, Padding.FRAME_BUCKETS) }.getOrDefault(-1)
         draftLine.text = "draft $n B → padded to $plainBucket B → encrypted → ≈ ${frame + 4} B frame. " +
-            "Any message up to 80 characters looks identical on the wire."
+            "Any message up to ${io.github.proteu5.onyx.core.MessagePolicy.MAX_CHARS} characters looks identical on the wire; every image is 60 KiB."
     }
 
     private val timeFmt = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
@@ -201,7 +203,7 @@ class ChatActivity : OnyxActivity() {
                 if (!m.outgoing) setStroke(dp(1), Forge.LINE)
             }
         }
-        b.add(text(m.text, 15f, Forge.TEXT))
+        MessageViews.fill(this, b, m) { app.messages.image(contactId, m.id) }
         val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(m.sentAtMinute * 60_000))
         val state = when (m.state) { MsgState.QUEUED -> " · queued"; MsgState.SENT -> " · delivered"; MsgState.FAILED -> " · failed"; MsgState.RECEIVED -> "" }
         val disappear = if (m.expiresAtMs > 0) " · ⏱" else ""
@@ -229,6 +231,25 @@ class ChatActivity : OnyxActivity() {
                     else if (e is io.github.proteu5.onyx.net.Messenger.Blocked) { input.setText(t); toast(e.message ?: "Blocked") }
                     else toast("Could not queue message")
                 } }
+        }
+    }
+
+    private fun pickImage() {
+        val c = contact() ?: return
+        if (!app.crypto.hasSession(c)) { toast("Secure session not ready yet — their phone must come online once."); return }
+        MessageViews.pickImage(this)
+    }
+
+    @Deprecated("platform API")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val uri = data?.data ?: return
+        if (requestCode != MessageViews.REQ_IMAGE || resultCode != RESULT_OK) return
+        val caption = input.text.toString().trim()
+        MessageViews.confirmAndSend(this, uri, caption) { jpeg, cap ->
+            val c = contact() ?: return@confirmAndSend
+            val r = runCatching { app.messenger.sendImage(c, jpeg, cap) }
+            runOnUiThread { if (r.isSuccess) input.setText("") else toast(r.exceptionOrNull()?.message ?: "Could not send image") }
         }
     }
 
@@ -277,6 +298,7 @@ class ChatActivity : OnyxActivity() {
             .setTitle("Delete ${c.name}?")
             .setMessage("Deletes the conversation, session keys and pinned identity from this phone. You would need to pair in person again.")
             .setPositiveButton("Delete") { _, _ ->
+                if (app.messenger.myMailboxId() == c.id) app.messenger.removeMyMailbox()
                 app.outbox.removeForContact(c.id); app.crypto.forget(c); app.contacts.delete(c.id); finish()
             }
             .setNegativeButton("Cancel", null).show()

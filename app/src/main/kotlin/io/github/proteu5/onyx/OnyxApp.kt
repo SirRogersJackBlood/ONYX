@@ -10,10 +10,15 @@ import io.github.proteu5.onyx.core.ByteReader
 import io.github.proteu5.onyx.core.ByteWriter
 import io.github.proteu5.onyx.data.ContactMetaRepo
 import io.github.proteu5.onyx.data.ContactRepo
+import io.github.proteu5.onyx.data.GroupRepo
 import io.github.proteu5.onyx.data.InviteRepo
+import io.github.proteu5.onyx.data.MailboxStore
 import io.github.proteu5.onyx.data.MessageRepo
 import io.github.proteu5.onyx.data.OutboxRepo
 import io.github.proteu5.onyx.data.SecureStore
+import io.github.proteu5.onyx.core.Frame
+import io.github.proteu5.onyx.data.Contact
+import io.github.proteu5.onyx.net.MailboxHost
 import io.github.proteu5.onyx.net.Messenger
 import io.github.proteu5.onyx.service.OnyxService
 import io.github.proteu5.onyx.signal.CryptoEngine
@@ -32,16 +37,49 @@ class OnyxApp : Application() {
     val contacts by lazy { ContactRepo(store, contactMeta) }
     val messages by lazy { MessageRepo(store, contactMeta) }
     val outbox by lazy { OutboxRepo(store) }
+    val groups by lazy { GroupRepo(store, contactMeta) }
     val crypto by lazy { CryptoEngine(OnyxSignalStore(store)) }
     val tor by lazy { TorController(this, store) }
     val snowflake by lazy { SnowflakeController(this, store) }
+    val mailboxStore by lazy { MailboxStore(store) }
+
+    /** This phone's side of mailbox mode. Only active when [mailboxMode] is on. */
+    private val mailboxHost = object : MailboxHost {
+        override val enabled: Boolean get() = mailboxMode
+        // A mailbox pairs with exactly one phone, its owner, and refuses every pairing after that.
+        override fun isOwner(c: Contact) = contacts.all().singleOrNull()?.id == c.id
+        override fun depositors() = mailboxStore.depositors()
+        override fun setDepositors(entries: List<Pair<ByteArray, ByteArray>>) = mailboxStore.setDepositors(entries)
+        override fun deposit(tag: ByteArray, m: Frame.Message) = mailboxStore.deposit(tag, m)
+        override fun keys() = mailboxStore.keys()
+        override fun item(digestHex: String) = mailboxStore.item(digestHex)?.let { Frame.MailboxItem(it.tag, it.message) }
+        override fun remove(digestHex: String) { mailboxStore.remove(digestHex) }
+        override fun sweep() { mailboxStore.sweep() }
+    }
+
     val messenger by lazy {
         Messenger(crypto, tor, contacts, messages, outbox, InviteRepo(store),
             badgeProvider = { snowflake.badge() },
-            notifyIncoming = { OnyxService.notifyNewMessage(this) }).apply {
+            notifyIncoming = { OnyxService.notifyNewMessage(this) },
+            mailbox = mailboxHost, groups = groups).apply {
             isBlocked = { id -> contactMeta.isBlocked(id) }
+            imageSanitizer = { jpeg -> io.github.proteu5.onyx.media.ImageSandbox.sanitize(this@OnyxApp, jpeg) }
+            myMailboxId = { store.get("prefs", "my-mailbox")?.let { String(it, Charsets.UTF_8) }?.takeIf { it.isNotEmpty() } }
+            saveMyMailboxId = { id -> store.put("prefs", "my-mailbox", (id ?: "").toByteArray(Charsets.UTF_8)) }
         }
     }
+
+    /**
+     * Mailbox mode (v1.4.0): this phone only holds encrypted messages for its owner. Can be turned on
+     * only while there are no contacts; turning it off wipes everything it holds.
+     */
+    var mailboxMode: Boolean
+        get() = store.get("prefs", "mailbox-mode")?.let { ByteReader(it).u8() == 1 } ?: false
+        set(v) {
+            if (v) check(contacts.all().isEmpty()) { "Mailbox mode needs a phone with no contacts." }
+            else mailboxStore.wipe()
+            store.put("prefs", "mailbox-mode", ByteWriter().u8(if (v) 1 else 0).toByteArray())
+        }
 
     // ---- app lock ----
     @Volatile var unlocked = false
@@ -52,8 +90,16 @@ class OnyxApp : Application() {
         get() = store.get("prefs", "applock")?.let { ByteReader(it).u8() == 1 } ?: false
         set(v) = store.put("prefs", "applock", ByteWriter().u8(if (v) 1 else 0).toByteArray())
 
+    /** Fingerprint of the accessibility services the user said they trust (warning hidden until that set changes). */
+    var a11yAcknowledged: String
+        get() = store.get("prefs", "a11y-ack")?.let { String(it, Charsets.UTF_8) } ?: ""
+        set(v) = store.put("prefs", "a11y-ack", v.toByteArray(Charsets.UTF_8))
+
     override fun onCreate() {
         super.onCreate()
+        // The image sandbox runs in an isolated process that also creates this Application. It must do NOTHING
+        // there: no vault, no store, no Tor. (It couldn't reach them anyway; this keeps it from trying.)
+        if (android.os.Process.isIsolated()) return
         instance = this
         vault = KeystoreVault(this)
         if (vault.isLost()) resetAfterKeyLoss()

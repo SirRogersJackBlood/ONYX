@@ -58,9 +58,13 @@ The protocol core has unit tests against published vectors and real injection pa
 - F-Droid release with reproducible builds
 - Hardware-isolated vault on devices that support protected VMs
 
-## Why only 80 characters, and no attachments?
+## Why 500 characters, and only images?
 
-On purpose. ONYX is for short conversations between people. It is not a file-transfer tool, a data pipe or something to wire into scripts or bots. Every message is limited to **80 characters on one line**, and code-shaped symbols (brackets, backticks, dollar signs, semicolons, pipes and friends) are removed, as are repeated symbols and invisible characters. There are **no attachments**, and none are planned. That keeps every message the same size on the wire, and makes ONYX useless as a hidden command channel. See [Threat model](threat-model#abuse-resistance).
+ONYX is for conversations between people. It is not a file-transfer tool, a data pipe or something to wire into scripts or bots. Messages are up to **500 characters on one line**, and code-shaped symbols (brackets, backticks, dollar signs, semicolons, pipes and friends) are removed, as are repeated symbols and invisible characters. Every text message is padded to the same size on the wire.
+
+**Links** are allowed: http(s) to a normal host name, at most 3 per message, with tracking parameters (utm_*, fbclid, gclid…) removed. ONYX never loads a link or shows a preview. Tapping one shows **"You are leaving ONYX"** with the full address first, and offers to copy it for Tor Browser instead. Links that hide the real site (`https://bank.com@evil.example`) or use look-alike letters aren't treated as links.
+
+**Images** are the only attachment. Your phone re-encodes each one to at most 800 pixels, which drops location, camera model, date and every other hidden detail; the receiving phone re-encodes it again in case the sender's app was modified. Every image is padded to exactly 60 KiB, so their sizes reveal nothing. Images stay inside ONYX: there is no save-to-gallery button, and screenshots stay blocked. No files, voice or video. See [Threat model](threat-model#abuse-resistance).
 
 ## Who makes ONYX?
 

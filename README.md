@@ -63,7 +63,7 @@ You add people **in person** by scanning a one-time QR code, or remotely with a 
 - **Invite links.** 24 h, single use and revocable, marked *unverified* until you compare safety numbers.
 - **Silent link authentication.** Strangers who find your `.onion` get a closed socket and learn nothing.
 - **Size hiding.** Every message and every wire frame is padded to fixed buckets.
-- **Abuse-resistant by design.** 80-character one-line messages, code symbols stripped, no attachments, rate-limited, no automation API. It's for people, not bots.
+- **Abuse-resistant by design.** 500-character one-line messages, code symbols stripped, links cleaned and behind a "You are leaving ONYX" notice, images re-encoded with no metadata (no other attachments), rate-limited, no automation API. It's for people, not bots.
 - **Hardware vault.** AES-256-GCM with the master key in StrongBox/TEE, HMAC'd index columns and secure delete.
 - **Hygiene.** Screenshots blocked, content-free notifications, app lock, disappearing messages, panic wipe.
 - **/FORGE rank.** Optionally run a Snowflake proxy to help censored users reach Tor (Wi-Fi and charging only). Your rank is visible only to people you chat with.

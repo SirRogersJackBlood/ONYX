@@ -52,6 +52,45 @@ sealed class Frame(val type: Int) {
         init { require(digest.size == 16) }
         override fun body() = digest.copyOf()
     }
+    // ---- Mailbox (v1.4.0): see docs/MAILBOX.md ----
+
+    /** Owner → its mailbox: send me what you hold. */
+    object Fetch : Frame(T_FETCH) { override fun body() = ByteArray(0) }
+
+    /** Mailbox → owner: one stored message. [tag] says which of the owner's contacts deposited it. */
+    class MailboxItem(val tag: ByteArray, val message: Message) : Frame(T_MBOX_ITEM) {
+        init { require(tag.size == Mailbox.TAG_LEN) }
+        override fun body() = tag + message.body()
+    }
+
+    /** Mailbox → owner: nothing more to send. */
+    object MailboxDone : Frame(T_MBOX_DONE) { override fun body() = ByteArray(0) }
+
+    /**
+     * Owner → its mailbox: the full set of contacts allowed to deposit, as (tag, depositKey) pairs
+     * derived from each pairing's link key. Replaces any previous set.
+     */
+    class MailboxKeys(val entries: List<Pair<ByteArray, ByteArray>>) : Frame(T_MBOX_KEYS) {
+        init {
+            require(entries.size <= Mailbox.MAX_DEPOSITORS)
+            entries.forEach { (t, k) -> require(t.size == Mailbox.TAG_LEN && k.size == 32) }
+        }
+        override fun body(): ByteArray {
+            val w = ByteWriter(2 + entries.size * (Mailbox.TAG_LEN + 32)).u16(entries.size)
+            entries.forEach { (t, k) -> w.fixed(t, Mailbox.TAG_LEN).fixed(k, 32) }
+            return w.toByteArray()
+        }
+    }
+
+    /**
+     * Transit benchmark (Settings → Developer, off by default): padding-only payload between paired contacts,
+     * answered with an ACK and thrown away. Measures wire size and delivery time; carries nothing.
+     */
+    class Bench(val payload: ByteArray) : Frame(T_BENCH) {
+        override fun body() = ByteWriter(payload.size + 4).bytes32(payload).toByteArray()
+        fun digest(): ByteArray = Bytes.sha256(payload).copyOfRange(0, 16)
+    }
+
     /** Generic refusal. Carries no reason on purpose. */
     object Reject : Frame(T_REJECT) { override fun body() = ByteArray(0) }
     object Bye : Frame(T_BYE) { override fun body() = ByteArray(0) }
@@ -64,10 +103,15 @@ sealed class Frame(val type: Int) {
         const val T_PAIR_RESP = 0x05
         const val T_MESSAGE = 0x10
         const val T_ACK = 0x11
+        const val T_FETCH = 0x20
+        const val T_MBOX_ITEM = 0x21
+        const val T_MBOX_DONE = 0x22
+        const val T_MBOX_KEYS = 0x23
         const val T_REJECT = 0x7e
         const val T_BYE = 0x7f
 
         const val MAX_CIPHERTEXT = 200_000
+        const val T_BENCH = 0x30
 
         fun decode(type: Int, body: ByteArray): Frame {
             val r = ByteReader(body)
@@ -79,6 +123,13 @@ sealed class Frame(val type: Int) {
                 T_PAIR_RESP -> PairResponse(r.rest())
                 T_MESSAGE -> Message(r.u8(), r.bytes32(MAX_CIPHERTEXT))
                 T_ACK -> Ack(r.raw(16))
+                T_FETCH -> Fetch
+                T_MBOX_ITEM -> MailboxItem(r.raw(Mailbox.TAG_LEN), Message(r.u8(), r.bytes32(MAX_CIPHERTEXT)))
+                T_MBOX_DONE -> MailboxDone
+                T_MBOX_KEYS -> MailboxKeys(List(r.u16().also { if (it > Mailbox.MAX_DEPOSITORS) throw MalformedException("too many keys") }) {
+                    r.raw(Mailbox.TAG_LEN) to r.raw(32)
+                })
+                T_BENCH -> Bench(r.bytes32(262_000))
                 T_REJECT -> Reject
                 T_BYE -> Bye
                 else -> throw MalformedException("unknown frame type")
@@ -118,10 +169,10 @@ class FrameCodec(input: InputStream, output: OutputStream) {
 
     fun read(): Frame {
         val len = din.readInt()
-        if (len !in Padding.FRAME_BUCKETS) throw MalformedException("frame length")
+        if (len !in Padding.FRAME_BUCKETS_ACCEPTED) throw MalformedException("frame length")
         val padded = ByteArray(len)
         din.readFully(padded)
-        val inner = Padding.unpad(padded, Padding.FRAME_BUCKETS)
+        val inner = Padding.unpad(padded, Padding.FRAME_BUCKETS_ACCEPTED)
         if (inner.isEmpty()) throw MalformedException("empty frame")
         val type = inner[0].toInt() and 0xff
         tap?.let { t -> runCatching { t(WireDirection.IN, type, wireBytes(padded)) } }
@@ -161,6 +212,7 @@ object WireAnatomy {
         Frame.T_CHALLENGE -> "CHALLENGE"; Frame.T_HELLO -> "HELLO"; Frame.T_WELCOME -> "WELCOME"
         Frame.T_PAIR_REQ -> "PAIR_REQUEST"; Frame.T_PAIR_RESP -> "PAIR_RESPONSE"
         Frame.T_MESSAGE -> "MESSAGE"; Frame.T_ACK -> "ACK"; Frame.T_REJECT -> "REJECT"; Frame.T_BYE -> "BYE"
+        Frame.T_BENCH -> "BENCH"; Frame.T_FETCH -> "FETCH"; Frame.T_MBOX_ITEM -> "MAILBOX_ITEM"; Frame.T_MBOX_DONE -> "MAILBOX_DONE"; Frame.T_MBOX_KEYS -> "MAILBOX_KEYS"
         else -> "0x%02x".format(t)
     }
 
@@ -204,4 +256,21 @@ object WireAnatomy {
         if (n < b.size) sb.append("… ${b.size - n} more bytes\n")
         return sb.toString()
     }
+}
+
+/**
+ * Mailbox credentials. A contact who shares a pairing link key with the mailbox's owner can derive
+ * the same deposit key and tag; the owner hands the mailbox only (tag, depositKey) pairs, so the
+ * mailbox never learns link keys, names or onion addresses of the owner's contacts.
+ */
+object Mailbox {
+    const val TAG_LEN = 16
+    const val MAX_DEPOSITORS = 1000
+    private val SALT = "onyx-mailbox-v1".toByteArray()
+
+    /** Key a contact uses to authenticate to the owner's mailbox (CHALLENGE/HELLO/WELCOME, as for links). */
+    fun depositKey(linkKey: ByteArray): ByteArray = Kdf.hkdf(linkKey, SALT, "deposit", 32)
+
+    /** Opaque label the mailbox stores with each deposit, so the owner knows who sent it. */
+    fun tag(linkKey: ByteArray): ByteArray = Kdf.hkdf(linkKey, SALT, "tag", TAG_LEN)
 }

@@ -25,18 +25,43 @@ class Envelope(
         /** First message after QR pairing; establishes the libsignal session. */
         PAIRED(4),
         /** Disappearing-message timer. Body = u32 seconds (0 = off). */
-        TIMER(5);
+        TIMER(5),
+        /** Sender's mailbox onion (v1.4.0). Body = 32-byte onion public key, or empty when removed. */
+        MAILBOX(6),
+        /** Group invite (v1.4.1). Body = [Groups.State]; joining is the receiver's choice. */
+        GROUP_INVITE(7),
+        /** Group roster, gossiped between members on change. Body = [Groups.State]. */
+        GROUP_STATE(8),
+        /** Group message, sent separately to each member. Body = [Groups.Text]. */
+        GROUP_TEXT(9),
+        /** Introduction between two members who aren't paired yet. Body = [Groups.Intro]. */
+        GROUP_INTRO(10),
+        /** Image (v1.4.4), already re-encoded without metadata. Body = [Media.Image]. Padded to one fixed size. */
+        IMAGE(11);
 
         companion object { fun of(c: Int) = values().firstOrNull { it.code == c } ?: throw MalformedException("kind") }
     }
 
-    fun encodePadded(): ByteArray = Padding.pad(
-        ByteWriter(body.size + 32).u8(VERSION).u8(kind.code).fixed(id, 16).u32(sentAtMinute).bytes32(body).toByteArray()
-    )
+    /**
+     * Text pads to at least 4 KiB, so any message up to 500 characters is the same size; every image pads to
+     * exactly 60 KiB. Control messages use the smallest bucket that fits.
+     */
+    fun encodePadded(): ByteArray {
+        val min = when (kind) { Kind.TEXT, Kind.GROUP_TEXT -> TEXT_BUCKET; Kind.IMAGE -> IMAGE_BUCKET; else -> 0 }
+        return Padding.pad(
+            ByteWriter(body.size + 32).u8(VERSION).u8(kind.code).fixed(id, 16).u32(sentAtMinute).bytes32(body).toByteArray(),
+            Padding.MESSAGE_BUCKETS.filter { it >= min }.toIntArray())
+    }
 
     companion object {
         const val VERSION = 1
-        const val MAX_BODY = 60_000
+        const val MAX_BODY = 130_000
+        const val TEXT_BUCKET = 4096
+        /**
+         * 60 KiB: with Signal's overhead an image still fits a 64 KiB wire frame (measured: ~0.8 s on Wi-Fi vs
+         * 1.2 s for the 256 KiB frames images used before, and 2–3× faster on a busy link).
+         */
+        const val IMAGE_BUCKET = 61_440
 
         fun text(s: String, nowMs: Long) = Envelope(Kind.TEXT, Bytes.random(16), nowMs / 60_000, s.toByteArray(Charsets.UTF_8))
 

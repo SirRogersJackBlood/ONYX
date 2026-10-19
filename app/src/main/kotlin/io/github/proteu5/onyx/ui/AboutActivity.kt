@@ -12,6 +12,9 @@ class AboutActivity : OnyxActivity() {
 
     /** Release history shown in the app. Newest first; keep in sync with CHANGELOG.md. */
     private val history = listOf(
+        "1.4.4" to "Images (re-encoded on both phones, no location or camera data), 500-character messages, links with a \"You are leaving ONYX\" notice and tracking removed.",
+        "1.4.1" to "Private groups up to 8: no admin, invites you choose to accept, joins and leaves signed by your own key.",
+        "1.4.0" to "Contact list for 5+ (search, sort, unread, archive, block), compact header, and your own mailbox phone for offline messages.",
         "1.3.0" to "F-Droid-ready release build, new app ID io.github.sirrogersjackblood.onyx (fresh install), per-device APKs.",
         "1.2.4" to "Reliability: no crash without a screen lock, no data loss when a screen lock is removed (Android 12-14), clean Tor restarts. Tested on Android 11, 13, 14, 15 and 16.",
         "1.2.3" to "Credits on this screen: design, direction & QA by SirRogersJackBlood; development by Claude (Anthropic). Final pre-release before beta.",
@@ -68,9 +71,9 @@ class AboutActivity : OnyxActivity() {
 
             add(text("A NOTE ON MESSAGES", 11f, Forge.MUTED, mono = true).apply { letterSpacing = 0.3f }, 20)
             add(text(
-                "ONYX is for people, not programs. Messages are 80 characters on one line: letters, numbers, " +
-                "emoji and basic punctuation. Code-like symbols and invisible characters are removed, there are no " +
-                "attachments, sending is rate-limited, and no other app can send through ONYX.", 13f, Forge.MUTED), 6)
+                "ONYX is for people, not programs. Messages are up to 500 characters on one line: letters, numbers, " +
+                "emoji, basic punctuation and cleaned-up links. Code-like symbols and invisible characters are removed. " +
+                "Images are the only attachment, re-encoded without metadata. Sending is rate-limited, and no other app can send through ONYX.", 13f, Forge.MUTED), 6)
 
             // ---------------- history ----------------
             add(text("VERSION HISTORY", 11f, Forge.MUTED, mono = true).apply { letterSpacing = 0.3f }, 24)

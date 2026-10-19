@@ -36,7 +36,7 @@ Because this happens in person, your contact is **verified from the first messag
 
 ## Sending a message
 
-Messages are **short and plain**: up to 80 characters on one line, letters, numbers, emoji and basic punctuation. There are no attachments. See [FAQ](faq#why-only-80-characters-and-no-attachments).
+Messages are **plain**: up to 500 characters on one line, letters, numbers, emoji, basic punctuation and links (tracking parameters removed, never previewed, and a "You are leaving ONYX" notice before anything opens). The only attachment is an **image**, re-encoded on both phones so no location, camera or date data survives. See [FAQ](faq#why-500-characters-and-only-images).
 
 
 1. ONYX pads your message to a fixed size so its length doesn't leak.
@@ -52,7 +52,7 @@ Tap **RAW** in any chat to split the screen. The lower half shows, live, the exa
 - **▲ OUT / ▼ IN**: each frame, its type, and its size on the wire (usually exactly 1,028 bytes for a normal message).
 - **Anatomy**: the bucket size, how many bytes are real payload versus zero padding, and whether it's a first (PQXDH) message or a normal Triple Ratchet message.
 - **Hex dump**: the start of the frame. Past the small header it's ciphertext, then zeros.
-- **While you type**, a meter shows how big your draft will be on the wire. "ok" and a full 80-character message produce the same size.
+- **While you type**, a meter shows how big your draft will be on the wire. "ok" and a full 500-character message produce the same size (4 KiB before encryption); every image is exactly 60 KiB.
 
 ![Two phones side by side, both with the RAW view open under the chat, showing 1,028-byte frames that are mostly zero padding](/screenshots/11-raw-wire-view.jpg)
 

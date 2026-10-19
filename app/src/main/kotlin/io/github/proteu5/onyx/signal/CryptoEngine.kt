@@ -224,5 +224,12 @@ class CryptoEngine(private val sig: OnyxSignalStore) {
 
     fun forget(c: Contact) = synchronized(lock) { sig.forget(c.signalName) }
 
+    /** Signs with this phone's identity key (group membership entries, v1.4.1). */
+    fun sign(message: ByteArray): ByteArray = synchronized(lock) { sig.identityKeyPair.privateKey.calculateSignature(message) }
+
+    /** Checks a signature made with [identityKey]. Never throws. */
+    fun verifySignature(identityKey: ByteArray, message: ByteArray, signature: ByteArray): Boolean =
+        runCatching { IdentityKey(identityKey).publicKey.verifySignature(message, signature) }.getOrDefault(false)
+
     companion object { const val DEVICE_ID = 1 }
 }

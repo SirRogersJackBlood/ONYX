@@ -121,6 +121,9 @@ abstract class OnyxActivity : Activity() {
             v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
             WindowInsets.CONSUMED
         }
+        // Android 14+: only real accessibility TOOLS (screen readers etc.) may read ONYX screens; other
+        // accessibility apps see nothing. Set on the root, inherited by every view below it.
+        if (android.os.Build.VERSION.SDK_INT >= 34) view.setAccessibilityDataSensitive(View.ACCESSIBILITY_DATA_SENSITIVE_YES)
         super.setContentView(view)
         view.requestApplyInsets()
     }
